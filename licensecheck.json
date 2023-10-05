@@ -1,0 +1,15 @@
+{
+    "failOnLicenses": [
+            "AGPL", "GNU AGPL",
+            "GPL-3.0-only", "GPL-3.0-or-later",
+            "CC-BY-NC-1.0", "CC-BY-NC-2.0", "CC-BY-NC-2.5", "CC-BY-NC-3.0", "CC-BY-NC-4.0"
+        ],
+    "npm": {
+        "excluded": [],
+        "excludedSubProjects": []
+    },
+    "python": {
+        "excluded": [],
+        "excludedSubProjects": []
+    }
+}

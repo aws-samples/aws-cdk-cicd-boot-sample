@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved. SPDX-License-Identifier: MIT-0
+
+. "$(dirname -- "$0")/_/husky.sh"
+
+if [ -z $RUN_PRE_COMMIT_HOOKS ]; then exit 0; fi
+
+./scripts/check-deps.sh
+./scripts/build.sh
+./scripts/test.sh
+./scripts/cdk-synth.sh

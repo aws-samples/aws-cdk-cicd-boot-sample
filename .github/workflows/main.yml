@@ -1,0 +1,41 @@
+---
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved. SPDX-License-Identifier: MIT-0
+# This pipeline is for running build checks
+name: Build-Checks
+
+# Controls when the workflow will run
+on:
+  push:
+    # Triggers the workflow for feature branches and main (final confirmation)
+    branches:
+      - "bugfix/*"
+      - "feature/*"
+      - "main"
+  pull_request:
+    branches:
+      - main
+      - release/*
+
+jobs:
+  CheckBuild:
+    env:
+      AWS_REGION: "eu-west-1"
+      ACCOUNT_RES: "012345678912"
+      ACCOUNT_DEV: "012345678912"
+      ACCOUNT_INT: "012345678912"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Check-Dependencies
+        run: ./scripts/check-deps.sh
+      - name: Build
+        run: ./scripts/build.sh
+      - name: Test
+        run: ./scripts/test.sh
+      - name: CDK-Synth
+        run: ./scripts/cdk-synth.sh

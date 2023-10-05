@@ -1,0 +1,22 @@
+#########################
+# Node Module: "."
+#########################
+"License","Count"
+"(MIT OR CC0-1.0)","2"
+"(MIT OR GPL-3.0-or-later)","1"
+"Apache-2.0","22"
+"BSD-2-Clause","9"
+"BSD-3-Clause","17"
+"CC-BY-4.0","1"
+"ISC","35"
+"MIT","392"
+"MIT*","1"
+"Python-2.0","1"
+#########################
+# Python Module: "./src/lambda-layer/common"
+#########################
+"License","Count"
+"Apache Software License","3"
+"Apache Software License; BSD License","2"
+"BSD License","3"
+"MIT License","3"
