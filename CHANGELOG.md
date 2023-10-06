@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Released]
 
+## [1.0.2] - 2023-10-06
+
+In this release we have done a small refactoring to the KMS Key Policy created by the EncryptionStack. Check in the sections below the description for this particular change. Please make sure to re-deploy the Encryption stack in your RES account manually using the instructions present in the README.md
+
+### Added
+
+### Changed
+- Remove redundant KMS Key policy already covered by the default admin policy of the CDK Construct
+
+### Fixed
+
 ## [1.0.1] - 2023-10-06
 
 In this release we have done a small fix to the KMS Key Policy created by the EncryptionStack. Check in the sections below the description for this particular change. Please make sure to re-deploy the Encryption stack in your RES account manually using the instructions present in the README.md

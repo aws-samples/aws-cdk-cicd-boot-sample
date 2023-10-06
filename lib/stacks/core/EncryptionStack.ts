@@ -21,28 +21,6 @@ export class EncryptionStack extends cdk.Stack {
       enableKeyRotation: true,
       alias: `${props.applicationName}-${props.stageName}-key`,
     });
-
-    const keyStatement = new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      actions: [
-        'kms:CancelKeyDeletion',
-        'kms:CreateAlias',
-        'kms:DeleteAlias',
-        'kms:DisableKey',
-        'kms:DisableKeyRotation',
-        'kms:EnableKeyRotation',
-        'kms:PutKeyPolicy',
-        'kms:UpdateAlias',
-        'kms:EnableKey',
-        'kms:ScheduleKeyDeletion',
-      ],
-      resources: ['*'],
-      principals: [
-        new iam.AccountRootPrincipal(),
-      ],
-    });
-
-    this.kmsKey.addToResourcePolicy(keyStatement);
     this.kmsKey.grantEncryptDecrypt(new iam.AccountRootPrincipal());
     this.kmsKey.grantEncryptDecrypt(new iam.ServicePrincipal(`logs.${this.region}.amazonaws.com`));
 
