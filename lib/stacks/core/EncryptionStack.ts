@@ -23,7 +23,7 @@ export class EncryptionStack extends cdk.Stack {
     });
 
     const keyStatement = new iam.PolicyStatement({
-      effect: iam.Effect.DENY,
+      effect: iam.Effect.ALLOW,
       actions: [
         'kms:CancelKeyDeletion',
         'kms:CreateAlias',
@@ -37,15 +37,9 @@ export class EncryptionStack extends cdk.Stack {
         'kms:ScheduleKeyDeletion',
       ],
       resources: ['*'],
-      notPrincipals: [
-        new iam.AnyPrincipal(),
+      principals: [
+        new iam.AccountRootPrincipal(),
       ],
-      conditions: {
-        StringNotLike: {
-          'aws:PrincipalArn':
-          cdk.DefaultStackSynthesizer.DEFAULT_CLOUDFORMATION_ROLE_ARN,
-        },
-      },
     });
 
     this.kmsKey.addToResourcePolicy(keyStatement);
