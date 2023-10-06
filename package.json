@@ -1,6 +1,6 @@
 {
   "name": "cicd-boot",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "bin": {
     "pipeline": "bin/pipeline-init.ts"
   },
