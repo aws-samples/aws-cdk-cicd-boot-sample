@@ -95,7 +95,7 @@ export class CDKPipeline extends pipelines.CodePipeline {
 
     const vpcConfig = {
       vpc: vpcProps.vpc,
-      subnetSelection: vpcProps.vpc.isolatedSubnets,
+      subnetSelection: vpcProps.vpc.isolatedSubnets ?? vpcProps.vpc.privateSubnets,
     };
 
     if (vpcProps.proxy?.proxySecretArn) {
