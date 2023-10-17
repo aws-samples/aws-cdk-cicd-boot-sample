@@ -21,7 +21,6 @@ export class EncryptionStack extends cdk.Stack {
       enableKeyRotation: true,
       alias: `${props.applicationName}-${props.stageName}-key`,
     });
-    this.kmsKey.grantEncryptDecrypt(new iam.AccountRootPrincipal());
     this.kmsKey.grantEncryptDecrypt(new iam.ServicePrincipal(`logs.${this.region}.amazonaws.com`));
 
     new cdk.CfnOutput(this, 'KeyArnCfnOutput', {

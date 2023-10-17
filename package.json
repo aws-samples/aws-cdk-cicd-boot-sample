@@ -1,6 +1,6 @@
 {
   "name": "cicd-boot",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "bin": {
     "pipeline": "bin/pipeline-init.ts"
   },
@@ -14,6 +14,7 @@
     "audit": "npm run audit-nodejs && npm run audit-python",
     "audit-nodejs": "npx better-npm-audit@3.7.3 audit --level=high --registry='https://registry.npmjs.org/'",
     "audit-python": "./scripts/check-deps-python.sh",
+    "audit-fix": "npx better-npm-audit@3.7.3 audit --level=high --registry='https://registry.npmjs.org/' --fix",
     "lint": "npx eslint . --ext .ts --max-warnings 0",
     "lint-fix": "npx eslint . --ext .ts --fix",
     "validate": "npx ts-node ./scripts/package-checksum-validator.ts"

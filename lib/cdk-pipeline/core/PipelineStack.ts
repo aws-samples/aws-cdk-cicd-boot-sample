@@ -65,8 +65,6 @@ export class PipelineStack extends cdk.Stack {
       const preDeployStep = new PreDeployBuildStep(deploymentStage as STAGE, {
         env: {
           TARGET_REGION: deploymentEnvironment.region,
-          VPC_ID: props.pipelineProps.vpcProps?.vpc.vpcArn ?? '', //WORKAROUND to force the export from the VPC Stack
-          VPC_SUBNETS: (props.pipelineProps.vpcProps?.vpc.isolatedSubnets ?? []).join(','), //WORKAROUND to force the export from the VPC Stack
         },
       });
 
