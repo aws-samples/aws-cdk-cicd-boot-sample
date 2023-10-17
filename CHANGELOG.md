@@ -16,6 +16,7 @@ In this release we have done mostly refactorings and small fixes. We refactored 
 - Remove redundant environment variables in the CDKPipeline
 ### Fixed
 - Fixed the network connectivity through private NAT Gateway when using VPC by enabling the usage of private subnets as the isolated subnets do not allow that in CDK.
+- Fixed vulnerability https://github.com/advisories/GHSA-67hx-6x53-jw92
 
 ## [1.0.2] - 2023-10-06
 
