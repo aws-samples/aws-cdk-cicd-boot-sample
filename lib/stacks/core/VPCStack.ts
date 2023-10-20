@@ -10,6 +10,11 @@ import { IVpcConfig } from '../../../config/VpcConfig';
 
 interface Props extends cdk.StackProps {
   vpcConfig: IVpcConfig;
+  proxy?: {
+    noProxy: string[];
+    proxySecretArn: string;
+    proxyTestUrl: string;
+  };
 }
 export class VPCStack extends cdk.Stack {
   readonly vpc: ec2.IVpc | undefined;
@@ -28,53 +33,91 @@ export class VPCStack extends cdk.Stack {
         break;
 
       case 'VPC':
-        const cidr = props.vpcConfig.VPC?.cidrBlock || '';
-        const subnetMask = props.vpcConfig.VPC?.subnetCidrMask;
-        this.vpc = new ec2.Vpc(this, 'vpc', {
-          ipAddresses: ec2.IpAddresses.cidr(cidr),
-          availabilityZones: [`${this.region}a`, `${this.region}b`],
-          restrictDefaultSecurityGroup: true,
-          subnetConfiguration: [{
-            cidrMask: subnetMask,
-            name: 'private',
-            subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
-          }],
-        });
-
-        const vpcFlowLogsDestinationS3 = aws_s3.Bucket.fromBucketName(this, 'vpcFlowLogsBucket', AppConfig.complianceLogBucketName.RES);
-        this.vpc.addFlowLog('vpcFlowLogs', {
-          destination: ec2.FlowLogDestination.toS3(vpcFlowLogsDestinationS3),
-          trafficType: ec2.FlowLogTrafficType.ALL,
-        });
-
-        const securityGroup = new ec2.SecurityGroup(this, 'SecurityGroup', {
-          vpc: this.vpc,
-          description: 'Allow traffic between CodeBuildStep and AWS Service VPC Endpoints',
-          securityGroupName: 'Security Group for AWS Service VPC Endpoints',
-          allowAllOutbound: true,
-        });
-        securityGroup.addIngressRule(ec2.Peer.ipv4(this.vpc.vpcCidrBlock), ec2.Port.tcp(443), 'HTTPS Traffic');
-
-        [ //VpcEndpoints
-          ec2.InterfaceVpcEndpointAwsService.SSM,
-          ec2.InterfaceVpcEndpointAwsService.STS,
-          ec2.InterfaceVpcEndpointAwsService.CLOUDWATCH_LOGS,
-          ec2.InterfaceVpcEndpointAwsService.CLOUDFORMATION,
-          ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
-        ].forEach((service: ec2.InterfaceVpcEndpointAwsService) => {
-          this.vpc!.addInterfaceEndpoint(`VpcEndpoint${service.shortName}`, {
-            service,
-            open: false,
-            securityGroups: [securityGroup],
-          });
-        });
-
-        // VPCGatewayEndpoints
-        this.vpc.addGatewayEndpoint('VpcGatewayS3', {
-          service: ec2.GatewayVpcEndpointAwsService.S3,
-        });
+        if (props.proxy?.proxySecretArn) {
+          this.vpc = this.launchVPCIsolated(props);
+        } else {
+          this.vpc = this.launchVPCWithEgress(props);
+        }
         break;
 
     }
+  }
+
+  private launchVPCIsolated(props: Props) {
+    const cidr = props.vpcConfig.VPC?.cidrBlock || '';
+    const subnetMask = props.vpcConfig.VPC?.subnetCidrMask;
+    const vpc = new ec2.Vpc(this, 'vpc', {
+      ipAddresses: ec2.IpAddresses.cidr(cidr),
+      restrictDefaultSecurityGroup: true,
+      subnetConfiguration: [{
+        cidrMask: subnetMask,
+        name: 'private-isolated',
+        subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
+      }],
+      maxAzs: props.vpcConfig.VPC?.maxAzs,
+    });
+
+    const vpcFlowLogsDestinationS3 = aws_s3.Bucket.fromBucketName(this, 'vpcFlowLogsBucket', AppConfig.complianceLogBucketName.RES);
+    vpc.addFlowLog('vpcFlowLogs', {
+      destination: ec2.FlowLogDestination.toS3(vpcFlowLogsDestinationS3),
+      trafficType: ec2.FlowLogTrafficType.ALL,
+    });
+
+    const securityGroup = new ec2.SecurityGroup(this, 'SecurityGroup', {
+      vpc: vpc,
+      description: 'Allow traffic between CodeBuildStep and AWS Service VPC Endpoints',
+      securityGroupName: 'Security Group for AWS Service VPC Endpoints',
+      allowAllOutbound: true,
+    });
+    securityGroup.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(443), 'HTTPS Traffic');
+
+    [ //VpcEndpoints
+      ec2.InterfaceVpcEndpointAwsService.SSM,
+      ec2.InterfaceVpcEndpointAwsService.STS,
+      ec2.InterfaceVpcEndpointAwsService.CLOUDWATCH_LOGS,
+      ec2.InterfaceVpcEndpointAwsService.CLOUDFORMATION,
+      ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
+    ].forEach((service: ec2.InterfaceVpcEndpointAwsService) => {
+      vpc!.addInterfaceEndpoint(`VpcEndpoint${service.shortName}`, {
+        service,
+        open: false,
+        securityGroups: [securityGroup],
+      });
+    });
+
+    // VPCGatewayEndpoints
+    vpc.addGatewayEndpoint('VpcGatewayS3', {
+      service: ec2.GatewayVpcEndpointAwsService.S3,
+    });
+
+    return vpc;
+  }
+
+  private launchVPCWithEgress(props: Props) {
+    const cidr = props.vpcConfig.VPC?.cidrBlock || '';
+    const subnetMask = props.vpcConfig.VPC?.subnetCidrMask;
+    const vpc = new ec2.Vpc(this, 'vpc', {
+      ipAddresses: ec2.IpAddresses.cidr(cidr),
+      restrictDefaultSecurityGroup: true,
+      subnetConfiguration: [{
+        cidrMask: subnetMask,
+        name: 'private-egress',
+        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+      },
+      {
+        cidrMask: subnetMask,
+        name: 'public',
+        subnetType: ec2.SubnetType.PUBLIC,
+      }],
+      maxAzs: props.vpcConfig.VPC?.maxAzs,
+    });
+
+    const vpcFlowLogsDestinationS3 = aws_s3.Bucket.fromBucketName(this, 'vpcFlowLogsBucket', AppConfig.complianceLogBucketName.RES);
+    vpc.addFlowLog('vpcFlowLogs', {
+      destination: ec2.FlowLogDestination.toS3(vpcFlowLogsDestinationS3),
+      trafficType: ec2.FlowLogTrafficType.ALL,
+    });
+
+    return vpc;
   }
 }

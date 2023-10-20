@@ -6,6 +6,7 @@ export type VpcType = 'NO_VPC' | 'VPC' | 'VPC_FROM_LOOK_UP'
 export interface IVpcConfigNewVpc {
   cidrBlock: string;
   subnetCidrMask: number;
+  maxAzs: number;
 }
 
 export interface IVpcConfigFromLookUp {

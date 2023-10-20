@@ -27,6 +27,7 @@ export const TestAppConfig: IAppConfig = {
     VPC: {
       cidrBlock: '',
       subnetCidrMask: 24,
+      maxAzs: 2,
     },
     VPC_FROM_LOOK_UP: {
       vpcId: 'vpc-123',

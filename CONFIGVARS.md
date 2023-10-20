@@ -21,6 +21,6 @@ CICD Boot uses a configuration script, `scripts/configure.sh` to set up the conf
 | CODESTAR_CONNECTION_ARN |  |  | sets the codestar connection required for GITHUB type |
 | CICD_VPC_TYPE | cicdVpcType | NO_VPC | sets the type of the VPC: `NO_VPC`, `VPC`, or `VPC_FROM_LOOK_UP`. |
 | CICD_VPC_ID | cicdVpcId |  | for use with `VPC_FROM_LOOK_UP` to set the vpc ID |
-| CICD_VPC_CIDR | cicdVpcCidr | 172.31.0.0/23 | for use with `VPC` to set the CIDR block of the VPC |
+| CICD_VPC_CIDR | cicdVpcCidr | 172.31.0.0/20 | for use with `VPC` to set the CIDR block of the VPC |
 | CICD_VPC_CIDR_MASK | cicdVpcCidrMask | 24 | for use with `VPC` to set the Subnet size |
 | PROXY_SECRET_ARN |  |  | used to set the ARN for the proxy secrets to enable proxy |
