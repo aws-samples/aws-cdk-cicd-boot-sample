@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Released]
 
+## [1.0.4] - 2023-10-20
+In this release we have done bug fixes to the ```CodeCommitRepositoryConstruct``` as well as addressed vulnerabilities in transitive dependencies. If you have configured CodeCommit as your ```repositoryType``` then please make sure to re-deploy the RepositoryStack in your RES account manually. This will update the CodeBuild Spec of the used PR Reviewer CodeBuild Project. You can always refer to the instructions present in the README.md on how to run the ```cdk deploy``` command locally.
+
+### Added
+- Added install commands CDKPipeline, Pre/Post DeployBuildSteps and CodeCommitRepositoryConstruct and ensured the commands are always run using the latest version of the awscli and boto3 sdk
+### Changed
+### Fixed
+- Fixed CodeBuild Spec for CodeCommitRepositoryConstruct to correctly pass the ```CDK_QUALIFIER``` down to the ```./scripts/warming.sh```
+- Fixed vulnerability https://github.com/advisories/GHSA-67hx-6x53-jw92 by explicitly overriding affected transitive dependency version
+
 ## [1.0.3] - 2023-10-17
 
 In this release we have done mostly refactorings and small fixes. We refactored the KMS Key Policy created by the EncryptionStackand and also the CDKPipeline where we removed redundant environment variables as well as fixed the network connectivity through private NAT Gateway when using VPC by enabling the usage of private subnets. Please make sure to re-deploy the Encryption stack in your RES account manually in order to update the KMS Key Policy, you can always refer to the instructions present in the README.md on how to run the ```cdk deploy``` command locally.

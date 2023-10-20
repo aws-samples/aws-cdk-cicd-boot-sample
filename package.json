@@ -1,6 +1,6 @@
 {
   "name": "cicd-boot",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "bin": {
     "pipeline": "bin/pipeline-init.ts"
   },
@@ -53,6 +53,7 @@
   },
   "overrides": {
     "http-cache-semantics": "4.1.1",
-    "semver": "7.5.3"
+    "semver": "7.5.3",
+    "@babel/traverse": "7.23.2"
   }
 }

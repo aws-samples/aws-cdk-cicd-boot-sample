@@ -57,10 +57,13 @@ export class CodeCommitRepositoryConstruct extends Construct {
       repository,
       buildSpec: codebuild.BuildSpec.fromObject({
         version: '0.2',
-        env: {
-          CDK_QUALIFIER: props.applicationQualifier,
-        },
         phases: {
+          install: {
+            commands: [
+              ...CDKPipeline.installCommands,
+              `export CDK_QUALIFIER=${props.applicationQualifier}`,
+            ],
+          },
           build: {
             commands: CDKPipeline.pipelineCommands,
           },

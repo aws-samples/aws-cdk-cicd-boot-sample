@@ -57,6 +57,11 @@ export class CDKPipeline extends pipelines.CodePipeline {
       './scripts/cdk-synth.sh',
     ];
 
+  static readonly installCommands: string[] =
+    [
+      'pip3 install awscli --upgrade --quiet',
+    ];
+
   private readonly codeGuruScanThreshold?: CodeGuruSeverityThreshold;
   private readonly applicationQualifier: string;
 
@@ -67,6 +72,7 @@ export class CDKPipeline extends pipelines.CodePipeline {
       dockerEnabledForSynth: props.isDockerEnabledForSynth,
       synth: new pipelines.ShellStep('Synth', {
         input: props.repositoryInput,
+        installCommands: CDKPipeline.installCommands,
         commands: CDKPipeline.pipelineCommands,
         env: {
           CDK_QUALIFIER: props.applicationQualifier,
