@@ -27,6 +27,7 @@ describe('vpc-stack-test-with-proxy', () => {
       noProxy: ['eu-west-1.amazonaws.com'],
       proxyTestUrl: 'https://docs.aws.amazon.com',
     },
+    flowLogsBucketName: TestAppConfig.complianceLogBucketName.RES,
   });
 
   const template = Template.fromStack(vpcStack);
@@ -85,6 +86,7 @@ describe('vpc-stack-test-without-proxy', () => {
   const vpcStack = new VPCStack(app, 'VPCStack', {
     env: { account: TestAppConfig.deploymentAccounts.RES, region: TestAppConfig.region },
     vpcConfig: vpcConfig,
+    flowLogsBucketName: TestAppConfig.complianceLogBucketName.RES,
   });
 
   const template = Template.fromStack(vpcStack);
@@ -115,6 +117,7 @@ describe('vpc-stack-test-omission', () => {
     new VPCStack(app, 'VPCStack', {
       env: { account: TestAppConfig.deploymentAccounts.RES, region: TestAppConfig.region },
       vpcConfig,
+      flowLogsBucketName: TestAppConfig.complianceLogBucketName.RES,
     }));
 
   test('Check if VPC is omitted', () => {

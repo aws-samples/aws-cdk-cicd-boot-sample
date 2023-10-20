@@ -15,6 +15,7 @@ interface Props extends cdk.StackProps {
     proxySecretArn: string;
     proxyTestUrl: string;
   };
+  flowLogsBucketName: string;
 }
 export class VPCStack extends cdk.Stack {
   readonly vpc: ec2.IVpc | undefined;
@@ -33,37 +34,32 @@ export class VPCStack extends cdk.Stack {
         break;
 
       case 'VPC':
-        if (props.proxy?.proxySecretArn) {
-          this.vpc = this.launchVPCIsolated(props);
-        } else {
-          this.vpc = this.launchVPCWithEgress(props);
-        }
+        this.vpc = props.proxy?.proxySecretArn
+          ? this.launchVPCIsolated(props)
+          : this.launchVPCWithEgress(props);
+        const vpcFlowLogsDestinationS3 = aws_s3.Bucket.fromBucketName(this, 'VpcFlowLogsBucket', props.flowLogsBucketName);
+        this.vpc.addFlowLog('vpcFlowLogs', {
+          destination: ec2.FlowLogDestination.toS3(vpcFlowLogsDestinationS3),
+          trafficType: ec2.FlowLogTrafficType.ALL,
+        });
         break;
 
     }
   }
 
   private launchVPCIsolated(props: Props) {
-    const cidr = props.vpcConfig.VPC?.cidrBlock || '';
-    const subnetMask = props.vpcConfig.VPC?.subnetCidrMask;
     const vpc = new ec2.Vpc(this, 'vpc', {
-      ipAddresses: ec2.IpAddresses.cidr(cidr),
+      ipAddresses: ec2.IpAddresses.cidr(props.vpcConfig.VPC?.cidrBlock!!),
       restrictDefaultSecurityGroup: true,
       subnetConfiguration: [{
-        cidrMask: subnetMask,
+        cidrMask: props.vpcConfig.VPC?.subnetCidrMask,
         name: 'private-isolated',
         subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
       }],
       maxAzs: props.vpcConfig.VPC?.maxAzs,
     });
 
-    const vpcFlowLogsDestinationS3 = aws_s3.Bucket.fromBucketName(this, 'vpcFlowLogsBucket', AppConfig.complianceLogBucketName.RES);
-    vpc.addFlowLog('vpcFlowLogs', {
-      destination: ec2.FlowLogDestination.toS3(vpcFlowLogsDestinationS3),
-      trafficType: ec2.FlowLogTrafficType.ALL,
-    });
-
-    const securityGroup = new ec2.SecurityGroup(this, 'SecurityGroup', {
+    const securityGroup = new ec2.SecurityGroup(this, 'VpcSecurityGroup', {
       vpc: vpc,
       description: 'Allow traffic between CodeBuildStep and AWS Service VPC Endpoints',
       securityGroupName: 'Security Group for AWS Service VPC Endpoints',
@@ -94,28 +90,20 @@ export class VPCStack extends cdk.Stack {
   }
 
   private launchVPCWithEgress(props: Props) {
-    const cidr = props.vpcConfig.VPC?.cidrBlock || '';
-    const subnetMask = props.vpcConfig.VPC?.subnetCidrMask;
     const vpc = new ec2.Vpc(this, 'vpc', {
-      ipAddresses: ec2.IpAddresses.cidr(cidr),
+      ipAddresses: ec2.IpAddresses.cidr(props.vpcConfig.VPC?.cidrBlock!!),
       restrictDefaultSecurityGroup: true,
       subnetConfiguration: [{
-        cidrMask: subnetMask,
+        cidrMask: props.vpcConfig.VPC?.subnetCidrMask,
         name: 'private-egress',
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
       },
       {
-        cidrMask: subnetMask,
+        cidrMask: props.vpcConfig.VPC?.subnetCidrMask,
         name: 'public',
         subnetType: ec2.SubnetType.PUBLIC,
       }],
       maxAzs: props.vpcConfig.VPC?.maxAzs,
-    });
-
-    const vpcFlowLogsDestinationS3 = aws_s3.Bucket.fromBucketName(this, 'vpcFlowLogsBucket', AppConfig.complianceLogBucketName.RES);
-    vpc.addFlowLog('vpcFlowLogs', {
-      destination: ec2.FlowLogDestination.toS3(vpcFlowLogsDestinationS3),
-      trafficType: ec2.FlowLogTrafficType.ALL,
     });
 
     return vpc;

@@ -40,6 +40,7 @@ const vpcStack = new VPCStack(app, `${AppConfig.applicationName}VPCStack`, {
   env: { account: AppConfig.deploymentAccounts.RES, region: AppConfig.region },
   vpcConfig: AppConfig.vpc,
   proxy: AppConfig.proxy,
+  flowLogsBucketName: AppConfig.complianceLogBucketName.RES,
 });
 
 const encryptionStack = new EncryptionStack(app, `${AppConfig.applicationName}EncryptionStack`, {
