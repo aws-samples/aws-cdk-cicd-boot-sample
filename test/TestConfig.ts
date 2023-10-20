@@ -25,7 +25,7 @@ export const TestAppConfig: IAppConfig = {
   vpc: {
     type: 'NO_VPC',
     VPC: {
-      cidrBlock: '',
+      cidrBlock: '172.31.0.0/20',
       subnetCidrMask: 24,
       maxAzs: 2,
     },
