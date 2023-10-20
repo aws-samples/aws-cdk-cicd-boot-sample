@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Released]
 
+## [1.0.5] - 2023-10-20
+In this release we have adjusted the VPCStack and fixed the combination of creating VPC and using it without Proxy. If you have configured ```cicdVpcType``` to VPC and want to adjust it, then you have to manually delete the VPCStack and re-deploy it manually in the RES account. You can always refer to the instructions present in the README.md on how to run the ```cdk deploy``` command locally.
+
+### Added
+### Changed
+### Fixed
+- Fixed VPC creation by adding NAT Gateway which allows CodeBuild to download packages from remote registries for 3rd party dependencies, e.g: npm, python etc
+
 ## [1.0.4] - 2023-10-20
 In this release we have done bug fixes to the ```CodeCommitRepositoryConstruct``` as well as addressed vulnerabilities in transitive dependencies. If you have configured CodeCommit as your ```repositoryType``` then please make sure to re-deploy the RepositoryStack in your RES account manually. This will update the CodeBuild Spec of the used PR Reviewer CodeBuild Project. You can always refer to the instructions present in the README.md on how to run the ```cdk deploy``` command locally.
 
