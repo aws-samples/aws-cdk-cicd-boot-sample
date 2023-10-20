@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT-0
 
 import * as pipelines from 'aws-cdk-lib/pipelines';
+import { CDKPipeline } from './CDKPipeline';
 import { STAGE } from '../../../config/Types';
 
 export class PreDeployBuildStep extends pipelines.CodeBuildStep {
@@ -14,7 +15,10 @@ export class PreDeployBuildStep extends pipelines.CodeBuildStep {
         ...props.env,
         STAGE: stage,
       },
-      commands: ['python src/codebuild/pre-deploy-test.py'],
+      commands: [
+        ...CDKPipeline.installCommands,
+        'python src/codebuild/pre-deploy-test.py',
+      ],
     });
     this.stage = stage;
   }

@@ -3,6 +3,7 @@
 
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as pipelines from 'aws-cdk-lib/pipelines';
+import { CDKPipeline } from './CDKPipeline';
 import { STAGE } from '../../../config/Types';
 
 export class PostDeployBuildStep extends pipelines.CodeBuildStep {
@@ -18,6 +19,7 @@ export class PostDeployBuildStep extends pipelines.CodeBuildStep {
         LOG_RETENTIONS_ROLE: logRetentionRoleArn,
       },
       commands: [
+        ...CDKPipeline.installCommands,
         'python src/codebuild/post-deploy-fixes.py',
         'python src/codebuild/post-deploy-test.py',
       ],
