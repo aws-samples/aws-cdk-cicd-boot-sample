@@ -268,6 +268,36 @@ Example configuration:
 
 ## Appendix
 
+#### Commit Messages
+
+By default we have enabled the commit-msg hook via [husky](https://typicode.github.io/husky/) which comes installed by default when you first run ```npm ci```. We are enforcing the convention described in [conventionalcommits](https://www.conventionalcommits.org/en/v1.0.0/) by default for the commit messages to help make the collaboration between team members transparent and consistent. In case you have commit messages that do not follow that convention then you won't be able to commit your changes from your local machine. Check the example below:
+*WRONG COMMIT MESSAGE*
+```bash
+> git commit -m "foo: this will fail"
+
+> cicd-boot@1.0.4 commitlint
+> commitlint --edit
+
+⧗   input: foo: this will fail
+✖   type must be one of [build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test] [type-enum]
+
+✖   found 1 problems, 0 warnings
+ⓘ   Get help: https://github.com/conventional-changelog/commitlint/#what-is-commitlint
+
+husky - commit-msg hook exited with code 1 (error)
+```
+
+*CORRECT COMMIT MESSAGE*
+```bash
+> git commit -m "docs: updated README.md with better instructions for the commit-msg hook"
+
+> cicd-boot@1.0.4 commitlint
+> commitlint --edit .git/COMMIT_EDITMSG
+
+[feat/developer-tools 24192d7] docs: updated README.md with better instructions for the commit-msg hook
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+```
+
 #### Enable running pre-commit hooks
 There are pre-commit hooks installed by default but not enabled. If you want to enable running them on every git commit then you need to export the following env variable in your CLI:
 
