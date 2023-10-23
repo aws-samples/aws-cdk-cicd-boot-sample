@@ -19,10 +19,6 @@ const deploymentAccounts = {
   INT: Environment.getEnvVar('ACCOUNT_INT'),
 };
 
-// preserving original functionality where vpc is created from defaults.
-const vpcSubnetCidrMaskStr = Environment.getEnvVar('CICD_VPC_CIDR_MASK', '') || Environment.getEnvVar('npm_package_config_cicdVpcCidrMask', '24');
-const vpcSubnetCidrMask = parseInt(vpcSubnetCidrMaskStr);
-
 export const AppConfig: IAppConfig = {
   applicationName: Environment.getEnvVar('npm_package_config_applicationName'),
   deploymentAccounts: deploymentAccounts,
@@ -35,8 +31,9 @@ export const AppConfig: IAppConfig = {
     type: Environment.getEnvVar('CICD_VPC_TYPE', '') as VpcType || Environment.getEnvVar('npm_package_config_cicdVpcType') as VpcType,
     VPC: {
       // preserving original functionality where vpc is created from defaults.
-      cidrBlock: Environment.getEnvVar('CICD_VPC_CIDR', '') || Environment.getEnvVar('npm_package_config_cicdVpcCidr', '172.31.0.0/23'),
-      subnetCidrMask: vpcSubnetCidrMask,
+      cidrBlock: Environment.getEnvVar('CICD_VPC_CIDR', '') || Environment.getEnvVar('npm_package_config_cicdVpcCidr', '172.31.0.0/20'),
+      subnetCidrMask: parseInt(Environment.getEnvVar('CICD_VPC_CIDR_MASK', '') || Environment.getEnvVar('npm_package_config_cicdVpcCidrMask', '24')),
+      maxAzs: parseInt(Environment.getEnvVar('CICD_VPC_MAXAZS', '') || Environment.getEnvVar('npm_package_config_cicdVpcMaxAZs', '2')),
     },
     VPC_FROM_LOOK_UP: {
       vpcId: Environment.getEnvVar('CICD_VPC_ID', '') || Environment.getEnvVar('npm_package_config_cicdVpcId', ''),

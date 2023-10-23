@@ -1,6 +1,6 @@
 {
   "name": "cicd-boot",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "bin": {
     "pipeline": "bin/pipeline-init.ts"
   },
@@ -16,7 +16,8 @@
     "audit-python": "./scripts/check-deps-python.sh",
     "lint": "npx eslint . --ext .ts --max-warnings 0",
     "lint-fix": "npx eslint . --ext .ts --fix",
-    "validate": "npx ts-node ./scripts/package-checksum-validator.ts"
+    "validate": "npx ts-node ./scripts/package-checksum-validator.ts",
+    "commitlint": "commitlint --edit"
   },
   "config": {
     "applicationName": "CICDBoot",
@@ -25,13 +26,24 @@
     "repositoryType": "CODECOMMIT",
     "cicdVpcType": "NO_VPC"
   },
+  "engines": {
+    "node": ">=18"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
   "devDependencies": {
+    "@commitlint/cli": "18.0.0",
+    "@commitlint/config-conventional": "18.0.0",
     "@types/jest": "29.5.4",
     "@types/node": "20.6.0",
     "@types/prettier": "2.6.0",
     "@types/source-map-support": "0.5.7",
     "@typescript-eslint/eslint-plugin": "6.7.0",
     "@typescript-eslint/parser": "6.7.0",
+    "cz-conventional-changelog": "3.3.0",
     "eslint": "8.49.0",
     "eslint-plugin-import": "2.28.1",
     "husky": "8.0.3",
