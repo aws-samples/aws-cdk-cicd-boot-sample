@@ -1,8 +1,5 @@
-/**
-* Copyright 2022 Amazon.com Inc. or its affiliates.
-* Provided as part of Amendment No. 5 to Definitive Agreement No. 8,
-* Activity/Deliverable 10 (to the Strategic Framework Agreement dated March 26, 2019).”
-*/
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0
 
 /* eslint-disable no-console */
 
