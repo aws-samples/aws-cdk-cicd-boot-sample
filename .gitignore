@@ -2,6 +2,8 @@
 !jest.config.js
 
 export_vars.sh
+export_vars.ps1
+export_vars.bat
 *.d.ts
 dist
 node_modules
@@ -21,6 +23,8 @@ cdk.out
 cdk.context.json
 
 **.DS_Store
+__pycache__
 
 # use Pipfile with Pipfile.lock instead
 requirements.txt
+

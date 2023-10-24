@@ -29,7 +29,7 @@ This repository contains the infrastructure as code to bootstrap your next CI/CD
 You need to have the following dependencies in place:
 
 - AWS Account (RES/DEV/INT/PROD)
-- Mac OS / Cloud9 with Ubuntu Server 22.04 LTS Platform in RES Account
+- Mac OS / Cloud9 with Ubuntu Server 22.04 LTS Platform in RES Account / Windows 10+
 - Bash/ZSH terminal
 - Docker version 20.10.x
 - aws-cli v2 [here](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
@@ -71,7 +71,7 @@ aws codestar-connections list-connections --profile ${RES_ACCOUNT_AWS_PROFILE}
 If you do not have the AWS CodeStar connection ready please check on how to configure it [here](./docs/prerequisites-github-codestarconnection.md).
 
 ### Optional: Determine VPC and Proxy settings for your pipeline
-By default, the Pipeline is configured to run **without** a VPC. To run inside a VPC, there are two options: `VPC` and `VPC_FROM_LOOK_UP`. These options are configured using `scripts/configure.sh` described in the next section.
+By default, the Pipeline is configured to run **without** a VPC. To run inside a VPC, there are two options: `VPC` and `VPC_FROM_LOOK_UP`. These options are configured using `scripts/configure.py` described in the next section.
 
 Use `VPC` if you want a single, self-contained pipeline running in a VPC. Not reccomended for use with multiple code pipelines in the same account. The VPC is created using defaulted settings.
 
@@ -83,13 +83,38 @@ Proxy Configuration requires proxy information to be stored in Secrets manager. 
 
 ### Prepare the local Environment
 
-Prepare local environment with the help of the CICD Boot Setup tool. Start by running the `./scripts/configure.sh` command and follow the instructions. Check in the Appendix for detailed instructions.
+Prepare local environment with the help of the CICD Boot Setup tool. Start by running the `./scripts/configure.py` command and follow the instructions. Check in the Appendix for detailed instructions.
+
+```bash
+./scripts/configure.py
+```
+
+```powershell
+py .\scripts\configure.py
+```
+
+```cmd
+py .\scripts\configure.py
+```
+
+Note: On Windows you might need to use the `python` command instead of the `py`. It depends on how the Python has been installed on the OS.
 
 #### After you modify the placeholders in the script, make it executable and source those variables:
 
 ```bash
 chmod +x export_vars.sh
 source export_vars.sh
+```
+
+```powershell
+.\export_vars.ps1
+```
+
+You might required to execute `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` to be able to run unsigned powershell scripts.
+
+
+```cmd
+export_vars.bat
 ```
 
 #### Install all the required npm dependencies for CDK:
@@ -108,24 +133,27 @@ If you do not have buckets, then manually create them `compliance-log-${(ACCOUNT
 policies using the commands below.
 
 ```bash
-function create_compliance_log_bucket {
-    local profile=$1
-    local account=$2
-    local region=$3
+npm run create-compilance-log-bucket $RES_ACCOUNT_AWS_PROFILE $ACCOUNT_RES $AWS_REGION
 
-    local bucket_name="compliance-log-${account}-${region}"
-    local policy=$(jq ".Statement[].Resource=\"arn:aws:s3:::$bucket_name/*\"" ./scripts/compliance-bucket-policy.json | tr '\n' ' ')
+npm run create-compilance-log-bucket $DEV_ACCOUNT_AWS_PROFILE $ACCOUNT_DEV $AWS_REGION
 
-    aws --profile $profile s3api create-bucket --bucket $bucket_name --create-bucket-configuration LocationConstraint=${region}
-    aws --profile $profile s3api put-bucket-policy --bucket $bucket_name --policy """$policy"""
-    aws --profile $profile s3api put-public-access-block --bucket $bucket_name --public-access-block-configuration "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
-}
+npm run create-compilance-log-bucket $INT_ACCOUNT_AWS_PROFILE $ACCOUNT_INT $AWS_REGION
+```
 
-create_compliance_log_bucket $RES_ACCOUNT_AWS_PROFILE $ACCOUNT_RES $AWS_REGION
+```powershell
+npm run create-compilance-log-bucket $env:RES_ACCOUNT_AWS_PROFILE $env:ACCOUNT_RES $env:AWS_REGION
 
-create_compliance_log_bucket $DEV_ACCOUNT_AWS_PROFILE $ACCOUNT_DEV $AWS_REGION
+npm run create-compilance-log-bucket $env:DEV_ACCOUNT_AWS_PROFILE $env:ACCOUNT_DEV $env:AWS_REGION
 
-create_compliance_log_bucket $INT_ACCOUNT_AWS_PROFILE $ACCOUNT_INT $AWS_REGION
+npm run create-compilance-log-bucket $env:INT_ACCOUNT_AWS_PROFILE $env:ACCOUNT_INT $env:AWS_REGION
+```
+
+```cmd
+npm run create-compilance-log-bucket %RES_ACCOUNT_AWS_PROFILE% %ACCOUNT_RES% %AWS_REGION%
+
+npm run create-compilance-log-bucket %DEV_ACCOUNT_AWS_PROFILE% %ACCOUNT_DEV% %AWS_REGION%
+
+npm run create-compilance-log-bucket %INT_ACCOUNT_AWS_PROFILE% %ACCOUNT_INT% %AWS_REGION%
 ```
 
 ### Bootstrap stages
@@ -136,6 +164,14 @@ create_compliance_log_bucket $INT_ACCOUNT_AWS_PROFILE $ACCOUNT_INT $AWS_REGION
 cdk bootstrap --profile $RES_ACCOUNT_AWS_PROFILE --qualifier ${CDK_QUALIFIER} aws://${ACCOUNT_RES}/${AWS_REGION}
 ```
 
+```powershell
+cdk bootstrap --profile $env:RES_ACCOUNT_AWS_PROFILE --qualifier $env:CDK_QUALIFIER aws://$env:ACCOUNT_RES/$env:AWS_REGION
+```
+
+```cmd
+cdk bootstrap --profile %RES_ACCOUNT_AWS_PROFILE% --qualifier %CDK_QUALIFIER% aws://%ACCOUNT_RES%/%AWS_REGION%
+```
+
 #### Prepare the DEV stage
 
 ```bash
@@ -144,12 +180,28 @@ arn:aws:iam::aws:policy/AdministratorAccess \
 --trust ${ACCOUNT_RES} aws://${ACCOUNT_DEV}/${AWS_REGION}
 ```
 
+```powershell
+cdk bootstrap --profile $env:DEV_ACCOUNT_AWS_PROFILE --qualifier $env:CDK_QUALIFIER --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess --trust $env:ACCOUNT_RES aws://$env:ACCOUNT_DEV/$env:AWS_REGION
+```
+
+```cmd
+cdk bootstrap --profile %DEV_ACCOUNT_AWS_PROFILE% --qualifier %CDK_QUALIFIER% --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess --trust %ACCOUNT_RES% aws://%ACCOUNT_DEV%/%AWS_REGION%
+```
+
 #### Prepare the INT stage
 
 ```bash
 cdk bootstrap --profile $INT_ACCOUNT_AWS_PROFILE --qualifier ${CDK_QUALIFIER} --cloudformation-execution-policies \
 arn:aws:iam::aws:policy/AdministratorAccess \
 --trust ${ACCOUNT_RES} aws://${ACCOUNT_INT}/${AWS_REGION}
+```
+
+```powershell
+cdk bootstrap --profile $env:INT_ACCOUNT_AWS_PROFILE --qualifier $env:CDK_QUALIFIER --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess --trust $env:ACCOUNT_RES aws://$env:ACCOUNT_INT/$env:AWS_REGION
+```
+
+```cmd
+cdk bootstrap --profile %INT_ACCOUNT_AWS_PROFILE% --qualifier %CDK_QUALIFIER% --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess --trust %ACCOUNT_RES% aws://%ACCOUNT_INT%/%AWS_REGION%
 ```
 
 #### Prepare the PROD stage
@@ -163,10 +215,26 @@ arn:aws:iam::aws:policy/AdministratorAccess \
 --trust resources_account_id aws://prod_account_id/your_aws_region
 ```
 
+```powershell
+cdk bootstrap --profile prod --qualifier $env:CDK_QUALIFIER --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess --trust resources_account_id aws://prod_account_id/your_aws_region
+```
+
+```cmd
+cdk bootstrap --profile prod --qualifier %CDK_QUALIFIER% --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess --trust resources_account_id aws://prod_account_id/your_aws_region
+```
+
 #### Deploy all the stacks
 
 ```bash
 cdk deploy --all --region ${AWS_REGION} --profile $RES_ACCOUNT_AWS_PROFILE --qualifier ${CDK_QUALIFIER}
+```
+
+```powershell
+cdk deploy --all --region $env:AWS_REGION --profile $env:RES_ACCOUNT_AWS_PROFILE --qualifier $env:CDK_QUALIFIER
+```
+
+```cmd
+cdk deploy --all --region %AWS_REGION% --profile %RES_ACCOUNT_AWS_PROFILE% --qualifier %CDK_QUALIFIER%
 ```
 
 Once the command finishes there will be the following CDK Stacks deployed into your RES Account:
@@ -174,7 +242,7 @@ Once the command finishes there will be the following CDK Stacks deployed into y
     - creating the CodeCommit repository (if you have it selected in config/AppConfig.ts) and the PullRequest automation behind CodeCommit to support scanning with CodeGuru and also run a set of configured commands same as the pipeline does in the Build phase.
     - establishing the CodeStar connection between your AWS RES Account and the configured Github repository.
 - SSMParameterStack  -> Responsible for creating the parameters in the SSM Parameter Store, e.g: Account IDs.
-- VPCStack -> Responsible for enabling the running of the build stages of the pipeline in a VPC, with or without a proxy. By default this stack is not going to be created unless configured via `configure.sh`. Check [here](#configure-vpc-and-proxy-setting-for-your-pipeline) for more information on the possible configurations.
+- VPCStack -> Responsible for enabling the running of the build stages of the pipeline in a VPC, with or without a proxy. By default this stack is not going to be created unless configured via `configure.py`. Check [here](#configure-vpc-and-proxy-setting-for-your-pipeline) for more information on the possible configurations.
 - EncryptionStack -> Responsible for creating the KMS Key used to encrypt all the created CW Log Groups.
 - PipelineStack   -> Responsible for creating the CodeCommit Repository and the CodePipelineStack with all the CodeBuild Steps
 
@@ -190,10 +258,25 @@ In case you are using CodeCommit then you need to configure the downstream of th
 sudo pip3 install git-remote-codecommit
 ```
 
+```powershell
+pip install git-remote-codecommit
+```
+
+```cmd
+pip install git-remote-codecommit
+```
+
 ```bash
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD);
 git remote add downstream codecommit::${AWS_REGION}://${RES_ACCOUNT_AWS_PROFILE}@${GIT_REPOSITORY};
 git commit -am "init downstream";
+git push -u downstream ${CURRENT_BRANCH}:main ### default branch for CodePipeline can be configured in config/AppConfig.ts
+```
+
+```powershell
+$CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+git remote add downstream codecommit::${env:AWS_REGION}://$env:RES_ACCOUNT_AWS_PROFILE@$env:GIT_REPOSITORY
+git commit -am "init downstream"
 git push -u downstream ${CURRENT_BRANCH}:main ### default branch for CodePipeline can be configured in config/AppConfig.ts
 ```
 
@@ -205,7 +288,14 @@ If you install new dependencies, please update `package-verification.json` by ru
 rm -rf node_modules ### remove the locally downloaded npm dependencies
 npm install  ### install fresh from the package.json, this will generate package-lock.json as well
 npm run generate-checksum ### will generate the checksum for the package-lock.json which is checked in the CI/CD
-./scripts/check-licenses-locally.sh -u ### will update the NOTICE file with the updated package versions
+./scripts/check-licenses-locally.py -u ### will update the NOTICE file with the updated package versions
+```
+
+```powershell
+Remove-Item node_modules -Recurse -Force
+npm install
+npm run generate-checksum
+py ./scripts/check-licenses-locally.py -u 
 ```
 
 ## Playbooks
@@ -229,13 +319,17 @@ NOTICE file consistency is tested by the `./scripts/check-licenses.sh`, this scr
 
 The script checks dependencies in `package.json` for NPM and `requirements.txt` for Python projects. In case, you are using other package managers, you need to manage those dependencies by **yourself** as long as that is not supported by CICD Boot.
 
-The used dependencies can be dependent on the Operating System and the runtime environment so for this reason the NOTICE file must contain everything that we distribute to the customer, i.e. everything that is installed by us in the customer's AWS account. We build a Docker image based on the CodeBuild Image to ensure the environment where the license checker runs is similar to the pipeline one. Running ```./scripts/check-licenses.sh``` locally will not give the same result as using it in the pipeline, for this reason we have a new script ```./scripts/check-licenses-locally.sh``` which builds the CodeBuild Docker Image from source and runs inside the container the ```./scripts/check-licenses.sh``` command.
+The used dependencies can be dependent on the Operating System and the runtime environment so for this reason the NOTICE file must contain everything that we distribute to the customer, i.e. everything that is installed by us in the customer's AWS account. We build a Docker image based on the CodeBuild Image to ensure the environment where the license checker runs is similar to the pipeline one. Running ```./scripts/check-licenses.sh``` locally will not give the same result as using it in the pipeline, for this reason we have a new script ```./scripts/check-licenses-locally.py``` which builds the CodeBuild Docker Image from source and runs inside the container the ```./scripts/check-licenses.sh``` command.
 
 To update the NOTICE file locally you need to run the following command:
 
 ```bash
-./scripts/check-licenses-locally.sh -u
+./scripts/check-licenses-locally.py -u
 ```
+
+```powershell
+py ./scripts/check-licenses-locally.py -u
+ ```
 
 The script is building an `aws/codebuild/standard:7.0` docker image and running the command inside of it to generate the NOTICE file.
 
@@ -305,9 +399,9 @@ There are pre-commit hooks installed by default but not enabled. If you want to 
 export RUN_PRE_COMMIT_HOOKS=true
 ```
 
-#### Details of Environment Variables configured by configure.sh
+#### Details of Environment Variables configured by configure.py
 
-The `scripts/configure.sh` script uses a series of prompts and user input to build a bash script that can be used to `source` your environment variables into your active shell/terminal. Additionally, the configure script sets values in the config section of the `package.json` file. The created `export_vars.sh` can be modified or duplicated to assist developers moving between potentially different test environments. For details of how Environment variables are used, see `AppConfig.ts` 
+The `scripts/configure.py` script uses a series of prompts and user input to build a bash script that can be used to `source` your environment variables into your active shell/terminal. Additionally, the configure script sets values in the config section of the `package.json` file. The created `export_vars.sh` can be modified or duplicated to assist developers moving between potentially different test environments. For details of how Environment variables are used, see `AppConfig.ts` 
 
 For more information, see [CONFIGVARS](CONFIGVARS.md)
 
@@ -370,7 +464,7 @@ The `Pipfile.lock` can be updated with the `pipenv lock` command.
 The locked dependencies can be installed with the locked version with the `pipenv sync` command.
 
 ### Create a new project
-Prepare a new project with the `./scripts/configure.sh` and prompt yes for the first question regarding new project creation. 'Creating a new pipeline project?' prompt yes and then follow the instructions. Once the setup finished,
+Prepare a new project with the `./scripts/configure.py` and prompt yes for the first question regarding new project creation. 'Creating a new pipeline project?' prompt yes and then follow the instructions. Once the setup finished,
 
 1. Ensure `export_vars.sh` is created and the values are correct.
 2. Follow the steps of the [Required](#required) and [Bootstrapping](#bootstrap-stages)
@@ -381,7 +475,7 @@ Prepare a new project with the `./scripts/configure.sh` and prompt yes for the f
 If you want to deploy multiple CICD Boot pipelines on the same AWS Account you need to make sure they are namespaced differently. If you just clone/fork this repository and deploy the same code in into multiple repositories in the same AWS Account you will have conflicting CloudFormation stacks deployed as they are all namespaced with ```cicdboot``` or ```CICDBoot```. In order to use different qualifier for the deployment as well as different Application Name please please refer to the section in details: [Change the cicdboot qualifier](#change-the-cicdboot-qualifier)
 
 ## Change the cicdboot qualifier
-If you want to use another qualifier other than cicdboot then you need to use the `./scripts/configure.sh` script to reconfigure the project.
+If you want to use another qualifier other than cicdboot then you need to use the `./scripts/configure.py` script to reconfigure the project.
 Changing the qualifier requires recreation of the deployed resources, so sure to first delete the following stacks in your RES/DEV/INT/PROD accounts and then do new bootstrapping.
 
 If you bootstrapped by mistake with the default qualifier then make sure to first delete the following stacks in your RES/DEV/INT/PROD accounts and then do new bootstrapping.
@@ -474,24 +568,27 @@ be consistent across those files.
   ```
   After performing this please do not forget to delete your CloudFormation resources on the previous INT Account.
 - `validation error detected: Value 'log-retention-..........-.......-...-DEV' at 'roleName' failed to satisfy constraint: Member must have length less than or equal to 64`: This usually happens if you use longer `applicationName` in the `config/AppConfig.ts` than 20 characters. In this case, you either use different application name or modify the log retention role in the [LogRetentionRoleStack](lib/stacks/core/LogRetentionRoleStack.ts).
-​
+- Windows - With PowerShell execution of the `export_envs.ps1` might result an error like `export_envs.ps1 is not digitally signed. You cannot run this script on the current system. For more information about running scripts and setting execution policy, see about_Execution_Policies at https:/go.microsoft.com/fwlink/?LinkID=135170.`, then run the `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` command and try to run the `export_envs.ps1` script again.
+- On Windows you might need to use the `python` command instead of the `py` command which used in the code snippet. It depends on how the Python has been installed on the OS and it has no impact on the results.
+- The `npm run create-compilance-log-bucket` command can log `OperationAborted: A conflicting conditional operation is currently in progress against this resource. Please try again.` errors after the bucket has been created in case there are other automation in place to manage the Bucket policies and public access.
 
 ## CDK Useful commands
 
-* `npm ci`                    install the packages from the frozen dependencies in the package-lock.json
-* `npm run build`             compile typescript to js
-* `npm run watch`             watch for changes and compile
-* `npm run test`              perform the jest unit tests
-* `npm install`               installs an npm package (make sure to run the npm run generate-checksum afterwards)
-* `npm run generate-checksum` generate checksum of the package-lock.json (after installing new dependencies)
-* `npm run audit`             audits both NPM and Python dependencies
-* `npm run audit-nodejs`      audits NPM dependencies
-* `npm run audit-python`      audits Python dependencies
-* `npm run lint`              check for linting issues in the project
-* `npm run lint-fix`          fix linting issues in the project (do not forget to add & commit the fixed files)
-* `cdk deploy`                deploy this stack to your default AWS account/region
-* `cdk diff`                  compare deployed stack with current state
-* `cdk synth --all`           emits the synthesized CloudFormation template for all stacks
+* `npm ci`                               install the packages from the frozen dependencies in the package-lock.json
+* `npm run build`                        compile typescript to js
+* `npm run watch`                        watch for changes and compile
+* `npm run test`                         perform the jest unit tests
+* `npm install`                          installs an npm package (make sure to run the npm run generate-checksum afterwards)
+* `npm run generate-checksum`            generate checksum of the package-lock.json (after installing new dependencies)
+* `npm run create-compilance-log-bucket` creates compilance log bucket on the accounts
+* `npm run audit`                        audits both NPM and Python dependencies
+* `npm run audit-nodejs`                 audits NPM dependencies
+* `npm run audit-python`                 audits Python dependencies
+* `npm run lint`                         check for linting issues in the project
+* `npm run lint-fix`                     fix linting issues in the project (do not forget to add & commit the fixed files)
+* `cdk deploy`                           deploy this stack to your default AWS account/region
+* `cdk diff`                             compare deployed stack with current state
+* `cdk synth --all`                      emits the synthesized CloudFormation template for all stacks
 
 ## Pointers to external documentation
 

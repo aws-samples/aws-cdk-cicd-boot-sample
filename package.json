@@ -5,7 +5,7 @@
     "pipeline": "bin/pipeline-init.ts"
   },
   "scripts": {
-    "prepare": "if [ -z $CODEBUILD_BUILD_ID ] && [ -z $GITHUB_ACTIONS ]; then husky install; fi",
+    "prepare": "node ./scripts/npm-prepare.mjs",
     "build": "tsc && tsc --build --clean && npm run lint",
     "watch": "tsc -w",
     "test": "jest",
@@ -16,6 +16,7 @@
     "audit-python": "./scripts/check-deps-python.sh",
     "lint": "npx eslint . --ext .ts --max-warnings 0",
     "lint-fix": "npx eslint . --ext .ts --fix",
+    "create-compilance-log-bucket": "node ./scripts/compilance-log-bucket.mjs",
     "validate": "npx ts-node ./scripts/package-checksum-validator.ts",
     "commitlint": "commitlint --edit"
   },
@@ -35,6 +36,9 @@
     ]
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "^3.430.0",
+    "@aws-sdk/credential-providers": "^3.430.0",
+    "@smithy/shared-ini-file-loader": "2.0.11",
     "@commitlint/cli": "18.0.0",
     "@commitlint/config-conventional": "18.0.0",
     "@types/jest": "29.5.4",
