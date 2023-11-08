@@ -242,7 +242,7 @@ The script is building an `aws/codebuild/standard:7.0` docker image and running 
 #### Note: The [aws/codebuild/standard:7.0](./utils/license-checker/Dockerfile) has been modified to only contain the Node, Python requirements, and to support ARM64 processors.
 
 ### Configuration options
-The script configuration can be specified in the ```licensecheck.json``` file.
+We have listed a set of example licenses which are in general prohibited if you plan to deploy anything to production systems and keep the code private. You can change these licenses anytime by updating the ```licensecheck.json``` file.
 
 Example configuration:
 
