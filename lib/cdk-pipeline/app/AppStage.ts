@@ -40,6 +40,7 @@ export class AppStage extends cdk.Stage {
 
     new LambdaStack(this, `${props.applicationName}LambdaStack`, {
       stageName: props.stage,
+      applicationName: props.applicationName,
     });
 
     new S3BucketStack(this, `${props.applicationName}S3Stack`, {

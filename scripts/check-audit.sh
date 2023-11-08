@@ -3,4 +3,5 @@
 
 set -e
 
-npm run cdk diff
+npm run validate
+npm run audit

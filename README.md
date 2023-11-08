@@ -204,8 +204,8 @@ If you install new dependencies, please update `package-verification.json` by ru
 ```bash
 rm -rf node_modules ### remove the locally downloaded npm dependencies
 npm install  ### install fresh from the package.json, this will generate package-lock.json as well
-npm run generate-checksum ### will generate the checksum for the package-lock.json which is checked in the CI/CD
-./scripts/check-licenses-locally.sh -u ### will update the NOTICE file with the updated package versions
+npm run validate:fix ### will generate the checksum for the package-lock.json which is checked in the CI/CD
+npm run audit:fix:license ### will update the NOTICE file with the updated package versions
 ```
 
 ## Playbooks
@@ -225,16 +225,16 @@ npm run generate-checksum ### will generate the checksum for the package-lock.js
 ## Create/update NOTICE file
 NOTICE file **must** be kept up to date in the repository.
 
-NOTICE file consistency is tested by the `./scripts/check-licenses.sh`, this script is included into the CodePipeline Build step to ensure the NOTICE file is always up-to-date.
+NOTICE file consistency is tested by the `npm run audit:license`, this script is included into the CodePipeline Build step to ensure the NOTICE file is always up-to-date.
 
-The script checks dependencies in `package.json` for NPM and `requirements.txt` for Python projects. In case, you are using other package managers, you need to manage those dependencies by **yourself** as long as that is not supported by CICD Boot.
+The script checks dependencies in `package.json` for NPM and `requirements.txt` for Python projects. In case, you are using other package managers, you need to manage those dependencies by **yourself** as long as that is not supported by Vanilla Pipeline.
 
-The used dependencies can be dependent on the Operating System and the runtime environment so for this reason the NOTICE file must contain everything that we distribute to the customer, i.e. everything that is installed by us in the customer's AWS account. We build a Docker image based on the CodeBuild Image to ensure the environment where the license checker runs is similar to the pipeline one. Running ```./scripts/check-licenses.sh``` locally will not give the same result as using it in the pipeline, for this reason we have a new script ```./scripts/check-licenses-locally.sh``` which builds the CodeBuild Docker Image from source and runs inside the container the ```./scripts/check-licenses.sh``` command.
+The used dependencies can be dependent on the Operating System and the runtime environment so for this reason the NOTICE file must contain everything that we distribute to the customer, i.e. everything that is installed by us in the customer's AWS account. We build a Docker image based on the CodeBuild Image to ensure the environment where the license checker runs is similar to the pipeline one. Running ```npm run audit:fix:license``` locally will give the same result as using it in the pipeline, to ensure that, based on your OS the dependency collection is executed inside a Docker container that provides similar environment to the CodeBuild.
 
 To update the NOTICE file locally you need to run the following command:
 
 ```bash
-./scripts/check-licenses-locally.sh -u
+npm run audit:fix:license
 ```
 
 The script is building an `aws/codebuild/standard:7.0` docker image and running the command inside of it to generate the NOTICE file.
@@ -242,7 +242,7 @@ The script is building an `aws/codebuild/standard:7.0` docker image and running 
 #### Note: The [aws/codebuild/standard:7.0](./utils/license-checker/Dockerfile) has been modified to only contain the Node, Python requirements, and to support ARM64 processors.
 
 ### Configuration options
-We have listed a set of example licenses which are in general prohibited if you plan to deploy anything to production systems and keep the code private. You can change these licenses anytime by updating the ```licensecheck.json``` file.
+The script configuration can be specified in the ```licensecheck.json``` file.
 
 Example configuration:
 
@@ -414,44 +414,9 @@ git merge ${CICD_BOOT_REMOTE}/${VERSION_TO_UPDATE_TO};
 ```
 
 ## Static Application Security Testing (SAST)
+The project applies the Day 0 mentality in Security. This means there are clearly defined Quality Gates defined in the pipeline where Security is checked and enforced to support the highest security standards for any project that uses the Harvesting Vanilla Pipeline as base. The quality checks are applied as early as the Pull Requests, and brings you a wide range of built-in tools that you can opt in or out as your project needs.
 
-### CDK Nag
-**cdk-nag** integrates directly into AWS Cloud Development Kit (AWS CDK) applications to provide identification and reporting mechanisms similar to SAST tooling.
-
-CDK Nag is applied as a CDK Aspect and it looks for patterns in the CDK Application that may indicate insecure infrastructure. Roughly speaking, it will look for:
-
-* IAM rules that are too permissive (wildcards)
-* Security group rules that are too permissive (wildcards)
-* Access logs that aren't enabled
-* Encryption that isn't enabled
-* Password literals
-* and many more
-
-The CDK Nag aspect is applied on the CDK application [bin/app.ts](./bin/app.ts), and on the AppStages deployed by the CodePipeline [lib/cdk-pipeline/app/AppStage.ts](./lib/cdk-pipeline/app/AppStage.ts) as well. This way we suppres warnings which are related to approved risk.
-
-The CDK Nag verification is executed to during the `cdk synth` phase.
-
-We recommend after you assess the risk of new findings to suppress CDK Nag rules from failing the CDK Deployment in their own dedicated stacks rather than doing it centrally. Please only use the central one for application wide approved suppressions in the [utils/suppression.ts](./utils/suppressions.ts), e.g: ```AWSLambdaBasicExecutionRole```
-
-More information about the CDK Nag can be found on these locations:
-- [AWS CDK NAG](https://github.com/cdklabs/cdk-nag)
-- [Manage application security and compliance with the AWS Cloud Development Kit and cdk-nag](https://aws.amazon.com/blogs/devops/manage-application-security-and-compliance-with-the-aws-cloud-development-kit-and-cdk-nag/)
-
-### Amazon CodeGuru Security
-
-[Amazon CodeGuru Security](https://aws.amazon.com/codeguru/) is a static application security testing (SAST) tool that combines machine learning (ML) and automated reasoning to identify vulnerabilities in your code, provide recommendations on how to fix the identified vulnerabilities, and track the status of the vulnerabilities until closure.
-
-Amazon Code Guru is applied on the pipeline as part of the Build stage to ensures the solution security meets with the highest standard. The scanning stops the pipeline in case there is any findings that have higher severity than `High` default. The threshold level can be adjusted by the `AppConfig.codeGuruScanThreshold` configuration option. The scanning can be disabled if the `AppConfig.codeGuruScanThreshold` configuration is removed. This is not recommended.
-
-The Amazon Code Guru findings and recommendations can be found on the AWS Console / Amazon CodeGuru / Security / Findings . The Findings page provides a holistic view about the security recommendations. Information about each Scanning can be found on the AWS Console / Amazon CodeGuru / Security / Scans page.
-
-### Amazon CodeGuru Reviewer
-
-[Amazon CodeGuru Reviewer](https://aws.amazon.com/codeguru/reviewer) detect vulnerabilities and automate code reviews with machine-learning powered recommendations. 
-
-Amazon CodeGuru Reviewer is included into pipelines created with AWS CodeCommit as VCS and it is automatically reviews the created Pull Requests and provides actionable recommendations on the changes.
-
-Amazon CodeGuru Reviewer  recommendations are available directly on the Pull Requests or on the AWS Console / Amazon CodeGuru / Reviewer / Code Reviews.
+For more information, see [SECURITY](SECURITY.md)
 
 ## Common Issues
 
@@ -478,20 +443,27 @@ be consistent across those files.
 
 ## CDK Useful commands
 
-* `npm ci`                    install the packages from the frozen dependencies in the package-lock.json
-* `npm run build`             compile typescript to js
-* `npm run watch`             watch for changes and compile
-* `npm run test`              perform the jest unit tests
-* `npm install`               installs an npm package (make sure to run the npm run generate-checksum afterwards)
-* `npm run generate-checksum` generate checksum of the package-lock.json (after installing new dependencies)
-* `npm run audit`             audits both NPM and Python dependencies
-* `npm run audit-nodejs`      audits NPM dependencies
-* `npm run audit-python`      audits Python dependencies
-* `npm run lint`              check for linting issues in the project
-* `npm run lint-fix`          fix linting issues in the project (do not forget to add & commit the fixed files)
-* `cdk deploy`                deploy this stack to your default AWS account/region
-* `cdk diff`                  compare deployed stack with current state
-* `cdk synth --all`           emits the synthesized CloudFormation template for all stacks
+* `npm ci`                              install the packages from the frozen dependencies in the package-lock.json
+* `npm run build`                       compile typescript to js
+* `npm run watch`                       watch for changes and compile
+* `npm run test`                        perform the jest unit tests
+* `npm install`                         installs an npm package (make sure to run the npm run validate:fix afterwards)
+* `npm run validate:fix`                generate checksum of the package-lock.json (after installing new dependencies)
+* `npm run validate`                    validate the checksum of the package-lock.json
+* `npm run audit`                       audits the project dependencies (both NPM and Python dependencies), source code with static code analyses
+* `npm run audit:deps:nodejs`           audits NPM dependencies
+* `npm run audit:deps:python`           audits Python dependencies
+* `npm run audit:scan:security`         perform static security checks (semgrep, bandit, shellcheck)
+* `npm run audit:license`               validate the NOTICE file
+* `npm run audit:fix:license`           update the NOTICE file of the project
+* `npm run license`                     validate the NOTICE file
+* `npm run license:default`             validate the NOTICE file on Linux systems
+* `npm run license:macos`               validate the NOTICE file on MacOS systems
+* `npm run lint`                        check for linting issues in the project
+* `npm run lint:fix`                    fix linting issues in the project (do not forget to add & commit the fixed files)
+* `cdk deploy`                          deploy this stack to your default AWS account/region
+* `cdk diff`                            compare deployed stack with current state
+* `cdk synth --all`                     emits the synthesized CloudFormation template for all stacks
 
 ## Pointers to external documentation
 

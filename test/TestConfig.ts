@@ -3,7 +3,7 @@
 
 import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import { IAppConfig, ICodeBuildEnvSettings } from '../config/Types';
-import { CodeGuruSeverityThreshold } from '../lib/cdk-pipeline/core/CodeGuruReviewStep';
+import { CodeGuruSeverityThreshold } from '../lib/cdk-pipeline/core/constructs/CodeGuruSecurityStepConstruct';
 
 const codeBuildEnvSettings: ICodeBuildEnvSettings = {
   isPrivileged: true,
@@ -45,6 +45,7 @@ export const TestAppConfig: IAppConfig = {
       description: 'CodeCommit repository used for the CI/CD pipeline',
       branch: 'main',
       codeBuildConfig: codeBuildEnvSettings,
+      codeGuruReviewer: true,
     },
   },
   complianceLogBucketName: {

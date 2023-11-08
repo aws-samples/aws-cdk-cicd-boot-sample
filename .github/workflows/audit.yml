@@ -1,0 +1,44 @@
+---
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved. SPDX-License-Identifier: MIT-0
+# This pipeline is for running audit checks, which include Dependency, source code scanning, and license verification
+name: Audit-Checks
+
+# Controls when the workflow will run
+on:
+  push:
+    # Triggers the workflow for feature branches and main (final confirmation)
+    branches:
+      - "bugfix/*"
+      - "feature/*"
+      - "main"
+  pull_request:
+    branches:
+      - main
+      - release/*
+
+jobs:
+  SecurityScans:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Security Scans
+        run: ./scripts/check-audit.sh
+      - name: Publish Security Scan Report in JUnit
+        uses: mikepenz/action-junit-report@0831a82caad2465c31c6dd929978f640cb42556c
+        if: success() || failure() # always run even if the previous step fails
+        with:
+          report_paths: 'junit-reports/*-junit-results.xml'
+      - name: Publish Security Scan Report in Checkstyle
+        uses: jwgmeligmeyling/checkstyle-github-action@a12be500c097a5cedab881d4785ef9b4a4d3ee6a
+        if: success() || failure() # always run even if the previous step fails
+        with:
+          path: 'junit-reports/*-checkstyle-results.xml'
+

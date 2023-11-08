@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Released]
 
+## [1.1.0] - 2023-11-08
+In this release we harden the security functionalities built into the pipeline. The newly introduced scanners ensure that not just your IaaC in TypeScript will follow the best practices but your Python and Bash scripts as well. Make sure to run ```npm ci``` after pulling this release into your existing version.
+BREAKING CHANGE: You need to first destroy the MonitoringStack first and then the existing LambdaStack before promoting the changes to the stages (DEV/INT/ ...)
+
+### Added
+- Automated Security Scanning with Bandit, Semgrep, Shellcheck
+### Changed
+- Remediated security findings
+- Reorganized package.json scripts to improve clarity on the items
+### Fixed
+- Added missing VPC Endpoint for KMS needed for upgrading the aws cli in the postDeploy hooks when using VPC + Proxy
+- Single account deployments of all stages for the example LambdaStack by namespacing with the ```applicationName```
+- Fix scripts/test.sh to exit in case the tests fail
+
 ## [1.0.5] - 2023-10-23
 In this release we have adjusted the VPCStack and fixed the combination of creating VPC and using it without Proxy. If you have configured ```cicdVpcType``` to VPC and want to adjust it, then you have to manually delete the VPCStack and re-deploy it manually in the RES account. You can always refer to the instructions present in the README.md on how to run the ```cdk deploy``` command locally. We have also added git commit message linting enforcing the convention specified by https://www.conventionalcommits.org. This will help to make the collaboration between team members transparent and consistent. We have included in the README.md examples of commit messages following this convention.
 

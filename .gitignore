@@ -24,3 +24,8 @@ cdk.context.json
 
 # use Pipfile with Pipfile.lock instead
 requirements.txt
+
+# Exclude virtual env
+.venv*/
+
+junit-reports

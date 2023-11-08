@@ -33,11 +33,13 @@ export class CodeCommitRepositoryConstruct extends Construct {
 
     this.pipelineInput = pipelines.CodePipelineSource.codeCommit(repository, props.branch);
 
-    // CODEREVIEW RESSOURCES
-    new codegurureviewer.CfnRepositoryAssociation(this, 'RepositoryAssociation', {
-      name: repository.repositoryName,
-      type: 'CodeCommit',
-    });
+    // CODEGURU REVIEW RESOURCES
+    if (props.codeGuruReviewer) {
+      new codegurureviewer.CfnRepositoryAssociation(this, 'RepositoryAssociation', {
+        name: repository.repositoryName,
+        type: 'CodeCommit',
+      });
+    }
 
     const approvalRuleTemplateName = new ApprovalRuleTemplate(this, 'ApprovalRuleTemplate', {
       approvalRuleTemplateName: `${props.applicationName}-Require-1-Approver`,
@@ -96,7 +98,7 @@ export class CodeCommitRepositoryConstruct extends Construct {
       },
       {
         id: 'AwsSolutions-CB4',
-        reason: 'Encryption not needed for CodeBuilld pull request verification',
+        reason: 'Encryption not needed for CodeBuild pull request verification',
       },
       {
         id: 'AwsSolutions-CB3',

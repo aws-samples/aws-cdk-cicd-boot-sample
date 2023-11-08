@@ -1,19 +1,16 @@
-/**
- * Copyright 2022 Amazon.com Inc. or its affiliates.
- * Provided as part of Amendment No. 5 to Definitive Agreement No. 8,
- * Activity/Deliverable 10 (to the Strategic Framework Agreement dated March 26, 2019).
- */
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0
 
 import * as cdk from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
 import * as codepipeline from 'aws-cdk-lib/aws-codepipeline';
-import { CodeGuruReviewStep, CodeGuruSeverityThreshold } from '../../lib/cdk-pipeline/core/CodeGuruReviewStep';
+import { CodeGuruSecurityStep as CodeGuruSecurityStepConstruct, CodeGuruSeverityThreshold } from '../../lib/cdk-pipeline/core/constructs/CodeGuruSecurityStepConstruct';
 import { TestAppConfig } from '../TestConfig';
 
 describe('codeguru-step-construct', () => {
   const stack = new cdk.Stack();
 
-  new CodeGuruReviewStep(stack, 'CodeGuruReviewStep', {
+  new CodeGuruSecurityStepConstruct(stack, 'CodeGuruReviewStep', {
     applicationQualifier: TestAppConfig.applicationQualifier,
     sourceOutput: new codepipeline.Artifact(),
     threshold: CodeGuruSeverityThreshold.HIGH,
