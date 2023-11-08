@@ -8,6 +8,7 @@ import { PythonLambdaLayer } from './constructs/PythonLambdaLayer';
 
 interface Props extends cdk.StackProps {
   stageName: string;
+  applicationName: string;
 }
 
 export class LambdaStack extends cdk.Stack {
@@ -23,7 +24,7 @@ export class LambdaStack extends cdk.Stack {
     ] : [];
 
     new lambda.Function(this, 'Function', {
-      functionName: `${props.stageName}-test-lambda`,
+      functionName: `${props.applicationName}-${props.stageName}-test-lambda`,
       runtime: lambda.Runtime.PYTHON_3_11,
       code: lambda.Code.fromAsset('src/lambda-functions/test'),
       handler: 'test-lambda.lambda_handler',

@@ -230,7 +230,7 @@ function create_holistic_notice() {
 
     echo "$FILES";
 
-    for f in "$FILES"
+    for f in $FILES
     do
         cat $f >> "$1";
     done
@@ -243,7 +243,7 @@ function create_holistic_summary() {
 
     echo "$FILES";
 
-    for f in "$FILES"
+    for f in $FILES
     do
         cat $f >> "$1";
     done

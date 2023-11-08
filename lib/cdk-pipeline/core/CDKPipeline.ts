@@ -7,7 +7,7 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as pipelines from 'aws-cdk-lib/pipelines';
 import { Construct, IConstruct } from 'constructs';
-import { CodeGuruReviewStep, CodeGuruSeverityThreshold } from './CodeGuruReviewStep';
+import { CodeGuruSecurityStep, CodeGuruSeverityThreshold } from './constructs/CodeGuruSecurityStepConstruct';
 
 interface Props extends PipelineProps {
   applicationQualifier: string;
@@ -49,8 +49,7 @@ export class CDKPipeline extends pipelines.CodePipeline {
   static readonly pipelineCommands: string[] =
     [
       './scripts/proxy.sh',
-      './scripts/check-licenses.sh',
-      './scripts/check-deps.sh',
+      './scripts/check-audit.sh',
       '. ./scripts/warming.sh',
       './scripts/build.sh',
       './scripts/test.sh',
@@ -157,12 +156,12 @@ export class CDKPipeline extends pipelines.CodePipeline {
     const getSourceOutput = () => this.pipeline.stages.find(stage => 'Source' === stage.stageName)?.actions.at(0)?.actionProperties.outputs?.at(0)!;
     const getBuildStage = () => this.pipeline.stages.find(stage => 'Build' === stage.stageName)!;
 
-    const codeReviewStep = new CodeGuruReviewStep(this, 'CodeGuruReviewStep', {
+    const codeGuruSecurityStep = new CodeGuruSecurityStep(this, 'CodeGuruReviewStep', {
       applicationQualifier: this.applicationQualifier,
       sourceOutput: getSourceOutput(),
       threshold,
     });
 
-    getBuildStage().addAction(codeReviewStep.action);
+    getBuildStage().addAction(codeGuruSecurityStep.action);
   }
 }

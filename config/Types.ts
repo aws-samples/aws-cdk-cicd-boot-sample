@@ -3,7 +3,7 @@
 
 import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import { IVpcConfig } from './VpcConfig';
-import { CodeGuruSeverityThreshold } from '../lib/cdk-pipeline/core/CodeGuruReviewStep';
+import { CodeGuruSeverityThreshold } from '../lib/cdk-pipeline/core/constructs/CodeGuruSecurityStepConstruct';
 
 export interface ICodeBuildEnvSettings {
   isPrivileged: boolean;
@@ -44,6 +44,7 @@ export interface ICodeCommitConfig {
   description: string;
   branch: string;
   codeBuildConfig: ICodeBuildEnvSettings;
+  codeGuruReviewer: boolean;
 }
 
 export interface ICodeStarConfig {

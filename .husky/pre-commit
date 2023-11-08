@@ -5,7 +5,7 @@
 
 if [ -z $RUN_PRE_COMMIT_HOOKS ]; then exit 0; fi
 
-./scripts/check-deps.sh
+./scripts/check-audit.sh
 ./scripts/build.sh
 ./scripts/test.sh
 ./scripts/cdk-synth.sh

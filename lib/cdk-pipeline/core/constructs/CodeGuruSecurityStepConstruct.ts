@@ -9,7 +9,7 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
 
-interface CodeGuruReviewStepProps {
+interface CodeGuruSecurityStepProps {
   applicationQualifier: string;
   sourceOutput: codepipeline.Artifact;
   threshold: CodeGuruSeverityThreshold;
@@ -23,13 +23,13 @@ export enum CodeGuruSeverityThreshold {
   CRITICAL = 'Critical'
 }
 
-export class CodeGuruReviewStep extends Construct {
+export class CodeGuruSecurityStep extends Construct {
 
   readonly action: codepipeline_actions.CodeBuildAction;
 
   readonly codeGuruScanImage = 'public.ecr.aws/l6c8c5q3/codegurusecurity-actions-public@sha256:1077986a48ec419f3bc72a2a321773f59c259632f0f9fb72b1a2067b12fd4311';
 
-  constructor(scope: Construct, id: string, props: CodeGuruReviewStepProps) {
+  constructor(scope: Construct, id: string, props: CodeGuruSecurityStepProps) {
     super(scope, id);
     const stack = cdk.Stack.of(this);
 

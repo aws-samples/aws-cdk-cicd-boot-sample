@@ -1,3 +1,4 @@
+#!/bin/bash
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved. SPDX-License-Identifier: MIT-0
 
 ############################################################
@@ -7,7 +8,7 @@ function check_dependencies_mac()
 {
   dependencies=$1
   echo -n "Checking dependencies... "
-  for name in ${dependencies[@]};
+  for name in "${dependencies[@]}";
   do
     [[ $(which $name 2>/dev/null) ]] || { echo -en "\n$name needs to be installed. Use 'brew install $name'";deps=1; }
   done
@@ -18,7 +19,7 @@ function check_dependencies_linux()
 {
   dependencies=$1
   echo -n "Checking dependencies... "
-  for name in ${dependencies[@]};
+  for name in "${dependencies[@]}";
   do
     [[ $(which $name 2>/dev/null) ]] || { echo -en "\n$name needs to be installed. Use 'sudo apt-get install $name'";deps=1; }
   done

@@ -5,7 +5,6 @@ import * as cdk from 'aws-cdk-lib';
 import { aws_s3 } from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
-import { AppConfig } from '../../../config/AppConfig';
 import { IVpcConfig } from '../../../config/VpcConfig';
 
 interface Props extends cdk.StackProps {
@@ -73,6 +72,7 @@ export class VPCStack extends cdk.Stack {
       ec2.InterfaceVpcEndpointAwsService.CLOUDWATCH_LOGS,
       ec2.InterfaceVpcEndpointAwsService.CLOUDFORMATION,
       ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
+      ec2.InterfaceVpcEndpointAwsService.KMS,
     ].forEach((service: ec2.InterfaceVpcEndpointAwsService) => {
       vpc!.addInterfaceEndpoint(`VpcEndpoint${service.shortName}`, {
         service,

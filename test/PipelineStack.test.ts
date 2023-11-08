@@ -4,7 +4,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
 import { TestAppConfig } from './TestConfig';
-import { CodeGuruSeverityThreshold } from '../lib/cdk-pipeline/core/CodeGuruReviewStep';
+import { CodeGuruSeverityThreshold } from '../lib/cdk-pipeline/core/constructs/CodeGuruSecurityStepConstruct';
 import { PipelineStack } from '../lib/cdk-pipeline/core/PipelineStack';
 import { RepositoryStack } from '../lib/stacks/core/RepositoryStack';
 

@@ -47,7 +47,7 @@ describe('vpc-stack-test-with-proxy', () => {
   });
 
   test('Check if VPC Endpoints exist', () => {
-    template.resourceCountIs('AWS::EC2::VPCEndpoint', 6);
+    template.resourceCountIs('AWS::EC2::VPCEndpoint', 7);
     [
       'ssm',
       'sts',

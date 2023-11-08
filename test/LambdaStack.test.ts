@@ -3,6 +3,7 @@
 
 import * as cdk from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
+import { TestAppConfig } from './TestConfig';
 import { STAGE } from '../config/Types';
 import { LambdaStack } from '../lib/stacks/app/LambdaStack';
 
@@ -13,12 +14,13 @@ describe('lambda-stack-test', () => {
   const template = Template.fromStack(
     new LambdaStack(app, 'LambdaStack', {
       stageName: STAGE.RES,
+      applicationName: TestAppConfig.applicationName,
     }));
 
   test('Check if lambda exists', () => {
     template.resourceCountIs('AWS::Lambda::Function', 1);
     template.hasResourceProperties('AWS::Lambda::Function', {
-      FunctionName: `${STAGE.RES}-test-lambda`,
+      FunctionName: `${TestAppConfig.applicationName}-${STAGE.RES}-test-lambda`,
       Runtime: 'python3.11',
     });
   });

@@ -19,4 +19,4 @@ if [[ `$DOCKER_COMMAND images -q $DOCKER_IMG 2> /dev/null` == "" ]]; then
     $DOCKER_COMMAND build -t $DOCKER_IMG $DOCKERFILE_DIR
 fi
 
-exec $DOCKER_COMMAND run -ti --rm --name cicdboot-license-checker --entrypoint "" -v ${PROJECT_ROOT}:/usr/local/app -w /usr/local/app ${DOCKER_IMG} bash -c "./scripts/check-licenses.sh $@";
+exec $DOCKER_COMMAND run --rm --name cicdboot-license-checker --entrypoint "" -v ${PROJECT_ROOT}:/usr/local/app -w /usr/local/app ${DOCKER_IMG} bash -c "./scripts/check-licenses.sh $*";
