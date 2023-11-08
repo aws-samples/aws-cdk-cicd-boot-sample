@@ -1,6 +1,6 @@
-# Security on Vanilla Pipeline
+# Security on CICD Boot
 
-Vanilla Pipeline brings the IaaC security on a new level with it's built in toolsets based on AWS best practices and industry wide standards. It includes Static Application Security Testing (SAST), Dependency Vulnerability Scanning, and AI based vulnerability scanning.
+CICD Boot brings the IaaC security on a new level with it's built in toolsets based on AWS best practices and industry wide standards. It includes Static Application Security Testing (SAST), Dependency Vulnerability Scanning, and AI based vulnerability scanning.
 
 ## Reference sheet of Security controls
 

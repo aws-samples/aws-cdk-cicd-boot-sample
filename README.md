@@ -227,7 +227,7 @@ NOTICE file **must** be kept up to date in the repository.
 
 NOTICE file consistency is tested by the `npm run audit:license`, this script is included into the CodePipeline Build step to ensure the NOTICE file is always up-to-date.
 
-The script checks dependencies in `package.json` for NPM and `requirements.txt` for Python projects. In case, you are using other package managers, you need to manage those dependencies by **yourself** as long as that is not supported by Vanilla Pipeline.
+The script checks dependencies in `package.json` for NPM and `requirements.txt` for Python projects. In case, you are using other package managers, you need to manage those dependencies by **yourself** as long as that is not supported by CICD Boot.
 
 The used dependencies can be dependent on the Operating System and the runtime environment so for this reason the NOTICE file must contain everything that we distribute to the customer, i.e. everything that is installed by us in the customer's AWS account. We build a Docker image based on the CodeBuild Image to ensure the environment where the license checker runs is similar to the pipeline one. Running ```npm run audit:fix:license``` locally will give the same result as using it in the pipeline, to ensure that, based on your OS the dependency collection is executed inside a Docker container that provides similar environment to the CodeBuild.
 
@@ -414,7 +414,7 @@ git merge ${CICD_BOOT_REMOTE}/${VERSION_TO_UPDATE_TO};
 ```
 
 ## Static Application Security Testing (SAST)
-The project applies the Day 0 mentality in Security. This means there are clearly defined Quality Gates defined in the pipeline where Security is checked and enforced to support the highest security standards for any project that uses the Harvesting Vanilla Pipeline as base. The quality checks are applied as early as the Pull Requests, and brings you a wide range of built-in tools that you can opt in or out as your project needs.
+The project applies the Day 0 mentality in Security. This means there are clearly defined Quality Gates defined in the pipeline where Security is checked and enforced to support the highest security standards for any project that uses the CICD Boot as base. The quality checks are applied as early as the Pull Requests, and brings you a wide range of built-in tools that you can opt in or out as your project needs.
 
 For more information, see [SECURITY](SECURITY.md)
 
