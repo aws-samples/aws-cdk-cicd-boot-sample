@@ -4,4 +4,5 @@
 set -e
 
 npm run validate
+npm ci
 npm run audit

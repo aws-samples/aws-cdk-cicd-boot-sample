@@ -18,7 +18,7 @@ BREAKING CHANGE: You need to first destroy the MonitoringStack first and then th
 ### Fixed
 - Added missing VPC Endpoint for KMS needed for upgrading the aws cli in the postDeploy hooks when using VPC + Proxy
 - Single account deployments of all stages for the example LambdaStack by namespacing with the ```applicationName```
-- Fix scripts/test.sh to exit in case the tests fail
+- Fix scripts/test.sh and scripts/configure.sh with with explicit exit on any unhandled exception
 
 ## [1.0.5] - 2023-10-23
 In this release we have adjusted the VPCStack and fixed the combination of creating VPC and using it without Proxy. If you have configured ```cicdVpcType``` to VPC and want to adjust it, then you have to manually delete the VPCStack and re-deploy it manually in the RES account. You can always refer to the instructions present in the README.md on how to run the ```cdk deploy``` command locally. We have also added git commit message linting enforcing the convention specified by https://www.conventionalcommits.org. This will help to make the collaboration between team members transparent and consistent. We have included in the README.md examples of commit messages following this convention.
