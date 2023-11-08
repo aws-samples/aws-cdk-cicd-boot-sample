@@ -18,7 +18,7 @@
     "audit:scan:security": "./scripts/check-code-scan-security.sh",
     "audit:license": "npm run license",
     "audit:fix:license": "npm run license -- -u",
-    "license": "npx run-script-os@1.1.6 --",
+    "license": "npx run-script-os --",
     "license:default": "./scripts/check-licenses.sh",
     "license:macos": "./scripts/check-licenses-locally.sh",
     "lint": "npx eslint . --ext .ts --max-warnings 0",
