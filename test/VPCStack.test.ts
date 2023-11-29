@@ -19,7 +19,7 @@ describe('vpc-stack-test-with-proxy', () => {
     },
   };
 
-  const vpcStack = new VPCStack(app, 'VPCStack', {
+  const vpcStack = new VPCStack(app, 'VPCStackWithProxy', {
     env: { account: TestAppConfig.deploymentAccounts.RES, region: TestAppConfig.region },
     vpcConfig: vpcConfig,
     proxy: {
@@ -83,7 +83,7 @@ describe('vpc-stack-test-without-proxy', () => {
     },
   };
 
-  const vpcStack = new VPCStack(app, 'VPCStack', {
+  const vpcStack = new VPCStack(app, 'VPCStackWithoutProxy', {
     env: { account: TestAppConfig.deploymentAccounts.RES, region: TestAppConfig.region },
     vpcConfig: vpcConfig,
     flowLogsBucketName: TestAppConfig.complianceLogBucketName.RES,
@@ -114,7 +114,7 @@ describe('vpc-stack-test-omission', () => {
   };
 
   const template = Template.fromStack(
-    new VPCStack(app, 'VPCStack', {
+    new VPCStack(app, 'VPCStackOmission', {
       env: { account: TestAppConfig.deploymentAccounts.RES, region: TestAppConfig.region },
       vpcConfig,
       flowLogsBucketName: TestAppConfig.complianceLogBucketName.RES,

@@ -6,7 +6,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Released]
 
-## [1.1.1] - 2023-11-29done
+## [1.1.2] - 2023-11-29
+In this release we have included bugfixes.
+
+### Added
+### Changed
+### Fixed
+- Issue in the PipelineStack tests when adding a stack deploying SecretsManager secrets. Namespaced all the template stack identifiers as well to avoid potential crashes during new resource creations
+- Enforce use of latest [pip](https://pypi.org/project/pip/) version in the Security Scans
+
+## [1.1.1] - 2023-11-29
 In this release we have included bugfixes, small updates to README as well as changed the Github Workflow to use cdk synth without lookup.
 
 ### Added

@@ -22,7 +22,7 @@ describe('pipeline-stack-test-codecommit', () => {
   });
 
   const template = Template.fromStack(
-    new PipelineStack(app, 'PipelineStack', {
+    new PipelineStack(app, 'PipelineStackCodeCommit', {
       env: { account: TestAppConfig.deploymentAccounts.RES, region: TestAppConfig.region },
       applicationName: TestAppConfig.applicationName,
       applicationQualifier: TestAppConfig.applicationQualifier,
@@ -125,7 +125,7 @@ describe('pipeline-stack-test-codestar', () => {
   });
 
   const template = Template.fromStack(
-    new PipelineStack(app, 'PipelineStack', {
+    new PipelineStack(app, 'PipelineStackCodeStar', {
       env: { account: TestAppConfig.deploymentAccounts.RES, region: TestAppConfig.region },
       applicationName: TestAppConfig.applicationName,
       applicationQualifier: TestAppConfig.applicationQualifier,
