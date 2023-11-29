@@ -193,7 +193,7 @@ sudo pip3 install git-remote-codecommit
 ```bash
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD);
 git remote add downstream codecommit::${AWS_REGION}://${RES_ACCOUNT_AWS_PROFILE}@${GIT_REPOSITORY};
-git commit -am "init downstream";
+git commit -am "feat: init downstream";
 git push -u downstream ${CURRENT_BRANCH}:main ### default branch for CodePipeline can be configured in config/AppConfig.ts
 ```
 
