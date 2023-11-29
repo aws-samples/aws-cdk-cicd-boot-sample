@@ -9,7 +9,7 @@ import { RepositoryStack } from '../lib/stacks/core/RepositoryStack';
 describe('repository-stack-test-codecommit', () => {
   const app = new cdk.App();
   const template = Template.fromStack(
-    new RepositoryStack(app, 'RepositoryStack', {
+    new RepositoryStack(app, 'RepositoryStackCodeCommit', {
       env: { account: TestAppConfig.deploymentAccounts.RES, region: TestAppConfig.region },
       applicationName: TestAppConfig.applicationName,
       applicationQualifier: TestAppConfig.applicationQualifier,
@@ -30,7 +30,7 @@ describe('repository-stack-test-codecommit', () => {
 
 describe('repository-stack-test-codestarconnect', () => {
   const app = new cdk.App();
-  const stack = new RepositoryStack(app, 'RepositoryStack', {
+  const stack = new RepositoryStack(app, 'RepositoryStackCodeStar', {
     env: { account: TestAppConfig.deploymentAccounts.RES, region: TestAppConfig.region },
     applicationName: TestAppConfig.applicationName,
     applicationQualifier: TestAppConfig.applicationQualifier,

@@ -37,4 +37,4 @@ jobs:
         run: ./scripts/test.sh
       - name: CDK-Synth-No-Lookup
         run: ./scripts/cdk-synth-no-lookup.sh
-            
+

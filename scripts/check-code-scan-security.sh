@@ -68,6 +68,8 @@ function initalize_security_env() {
     $PYTHON_COMMAND -m venv "$WORK_DIR/venv" > /dev/null;
 
     . $WORK_DIR/venv/bin/activate;
+
+    $PYTHON_COMMAND -m pip install --upgrade pip > /dev/null;
 }
 
 function install_python_dependency() {
@@ -86,7 +88,7 @@ function install_python_dependency() {
 function report_location() {
     ## On CI/CD generate reports always
     if [[ -z "$JUNIT_REPORT" ]]; then
-        if [ ! -z $CODEBUILD_BUILD_ID ] || [ -z $CODEBUILD_BUILD_ID ]; then 
+        if [ ! -z $CODEBUILD_BUILD_ID ] || [ -z $CODEBUILD_BUILD_ID ]; then
             JUNIT_REPORT="ci";
         fi
     fi
@@ -132,7 +134,7 @@ function bandit_scan() {
     install_python_dependency "bandit" "$BANDIT_VERSION";
     # Execute bandit
     if [[ -z "$JUNIT_REPORT" ]]; then
-        bandit -x '**node_modules/*,**cdk.out/*' -r . 
+        bandit -x '**node_modules/*,**cdk.out/*' -r .
     else
         if ! bandit -x '**node_modules/*,**cdk.out/*' -r -f xml -q . > "${JUNIT_REPORT_FOLDER}/bandit-junit-results.xml"; then
             CHECK_FAILED=1;
