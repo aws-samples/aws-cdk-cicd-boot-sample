@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Released]
 
+## [1.1.1] - 2023-11-29done
+In this release we have included bugfixes, small updates to README as well as changed the Github Workflow to use cdk synth without lookup.
+
+### Added
+### Changed
+- Use cdk synth --no-lookup (scripts/cdk-synth-no-lookup.sh) in the Github Workflows. This helps the forks which are using [Amazon VPC](https://docs.aws.amazon.com/de_de/vpc/latest/userguide/what-is-amazon-vpc.html) remove the need to connect their Github repo to the AWS Account where the VPC is living. Instead, the lookup will still run in the CodePipeline steps as before.
+### Fixed
+- Commit message for the initialization of the downstream with CodeCommit in accordance with the conventional commits convention.
+- Bump cryptography from 41.0.4 to 41.0.6 in /src/lambda-layer/common which solves [CWE-476](https://cwe.mitre.org/data/definitions/476.html)
+
 ## [1.1.0] - 2023-11-08
 In this release we harden the security functionalities built into the pipeline. The newly introduced scanners ensure that not just your IaaC in TypeScript will follow the best practices but your Python and Bash scripts as well. Make sure to run ```npm ci``` after pulling this release into your existing version.
 BREAKING CHANGE: You need to first destroy the MonitoringStack first and then the existing LambdaStack before promoting the changes to the stages (DEV/INT/ ...)
