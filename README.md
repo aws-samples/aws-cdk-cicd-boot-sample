@@ -73,9 +73,9 @@ If you do not have the AWS CodeStar connection ready please check on how to conf
 ### Optional: Determine VPC and Proxy settings for your pipeline
 By default, the Pipeline is configured to run **without** a VPC. To run inside a VPC, there are two options: `VPC` and `VPC_FROM_LOOK_UP`. These options are configured using `scripts/configure.sh` described in the next section.
 
-Use `VPC` if you want a single, self-contained pipeline running in a VPC. Not reccomended for use with multiple code pipelines in the same account. The VPC is created using defaulted settings.
+Use `VPC` if you want a single, self-contained pipeline running in a VPC. Not recommended for use with multiple code pipelines in the same account. The VPC is created using defaulted settings.
 
-Use `VPC_FROM_LOOK_UP` to look up an existing VPC based on its vpc ID. It is reccomended to create this VPC prior to deploying the pipeline. Multiple deployments of the pipeline can share the same VPC.
+Use `VPC_FROM_LOOK_UP` to look up an existing VPC based on its vpc ID. It is recommended to create this VPC prior to deploying the pipeline. Multiple deployments of the pipeline can share the same VPC.
 
 Note: Switching between VPC options may require a complete tear down and redeploy of the pipeline
 
