@@ -13,7 +13,7 @@ In this release we have included bugfixes, updates to README as well as refreshe
 - ```CodeCommitRepositoryAspects``` to override the NodeJS version for the Lambdas and the CustomResources deployed by the ```CodeCommitRepositoryConstruct``` to ```NODEJS_16_X```. Important to know is that NODEJS_16_X which will be deprecated (phase 1) on Jun 12, 2024 as per official documentation [here](https://docs.aws.amazon.com/lambda/latest/dg/lambda-nodejs.html). Check under **Known Issues** for more information regarding the **CodeCommitRepositoryConstruct: NODEJS_16_X support**
 ### Changed
 - Updated local environment version requirements for docker, node, npm, python
-- Updated ```scripts/check-deps-python.sh```, ```scripts/proxy.sh```, ```scripts/test.sh``` to error out in case of any unhandled exceptions
+- Updated ```scripts/proxy.sh``` to error out in case of any unhandled exceptions
 - Wrapped up all the cdk commands to run from the shipped cdk version in the package.json (e.g: `npm run cdk`)
 ### Fixed
 - `scripts/check-deps-python.sh` checks now all the folders that contains valid Python dependency definitions, not only the src/lambda-layer/common folder

@@ -31,11 +31,11 @@ You need to have the following dependencies in place:
 - AWS Account (RES/DEV/INT/PROD)
 - Mac OS / Cloud9 with Ubuntu Server 22.04 LTS Platform in RES Account
 - Bash/ZSH terminal
-- Docker version 20.10.x
+- Docker version 24.0.x
 - aws-cli v2 [here](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 - AWS credentials and profiles for each environment under ~/.aws/config [here](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
-- Node v18.10.* && NPM v8.19.*
-- Python 3.*
+- Node v18.17.* && NPM v10.2.*
+- Python >= 3.11
 - Pipenv 2023.* [here](https://pipenv.pypa.io/en/latest/)
 - jq command line JSON processor jq-1.5
 
