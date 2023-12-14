@@ -25,7 +25,7 @@ export class LambdaStack extends cdk.Stack {
 
     new lambda.Function(this, 'Function', {
       functionName: `${props.applicationName}-${props.stageName}-test-lambda`,
-      runtime: lambda.Runtime.PYTHON_3_11,
+      runtime: lambda.Runtime.PYTHON_3_12,
       code: lambda.Code.fromAsset('src/lambda-functions/test'),
       handler: 'test-lambda.lambda_handler',
       layers: [...layers],

@@ -17,7 +17,6 @@ export class SecurityControls implements IAspect {
   private readonly logRetentionInDays: string;
   private readonly complianceLogBucketName: string;
 
-
   constructor(kmsKey: aws_kms.Key, stage: string, logRetentionInDays: string, complianceLogBucketName: string) {
     this.encryptionKey = kmsKey;
     this.stage = stage;

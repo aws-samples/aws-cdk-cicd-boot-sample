@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Released]
 
+## [1.1.3] - 2023-12-14
+In this release we have included bugfixes, updates to README as well as refreshed the local environment requirements and all the packages in the package.json and in the lambda layers to the latest available versions. We have also introduced a way how to override the minimum required version of NodeJS for some libraries we have a hard depdendency on and do not have yet the latest NodeJS in use.
+
+### Added
+- ```CodeCommitRepositoryAspects``` to override the NodeJS version for the Lambdas and the CustomResources deployed by the ```CodeCommitRepositoryConstruct``` to ```NODEJS_16_X```. Important to know is that NODEJS_16_X which will be deprecated (phase 1) on Jun 12, 2024 as per official documentation [here](https://docs.aws.amazon.com/lambda/latest/dg/lambda-nodejs.html). Check under **Known Issues** for more information regarding the **CodeCommitRepositoryConstruct: NODEJS_16_X support**
+### Changed
+- Updated local environment version requirements for docker, node, npm, python
+- Updated ```scripts/proxy.sh``` to error out in case of any unhandled exceptions
+- Wrapped up all the cdk commands to run from the shipped cdk version in the package.json (e.g: `npm run cdk`)
+### Fixed
+- `scripts/check-deps-python.sh` checks now all the folders that contains valid Python dependency definitions, not only the src/lambda-layer/common folder
+- `scripts/check-code-scan-security.sh` local execution of scan execution with out silent mode for improved troubleshooting experience
+- typo in wrapper script `scripts/cdk-synth-no-lookup.sh`
+
 ## [1.1.2] - 2023-11-29
 In this release we have included bugfixes.
 

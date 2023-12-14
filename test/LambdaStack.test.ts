@@ -21,7 +21,7 @@ describe('lambda-stack-test', () => {
     template.resourceCountIs('AWS::Lambda::Function', 1);
     template.hasResourceProperties('AWS::Lambda::Function', {
       FunctionName: `${TestAppConfig.applicationName}-${STAGE.RES}-test-lambda`,
-      Runtime: 'python3.11',
+      Runtime: 'python3.12',
     });
   });
 });

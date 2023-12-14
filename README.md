@@ -31,11 +31,11 @@ You need to have the following dependencies in place:
 - AWS Account (RES/DEV/INT/PROD)
 - Mac OS / Cloud9 with Ubuntu Server 22.04 LTS Platform in RES Account
 - Bash/ZSH terminal
-- Docker version 20.10.x
+- Docker version 24.0.x
 - aws-cli v2 [here](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 - AWS credentials and profiles for each environment under ~/.aws/config [here](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
-- Node v18.10.* && NPM v8.19.*
-- Python 3.*
+- Node v18.17.* && NPM v10.2.*
+- Python >= 3.11
 - Pipenv 2023.* [here](https://pipenv.pypa.io/en/latest/)
 - jq command line JSON processor jq-1.5
 
@@ -73,9 +73,9 @@ If you do not have the AWS CodeStar connection ready please check on how to conf
 ### Optional: Determine VPC and Proxy settings for your pipeline
 By default, the Pipeline is configured to run **without** a VPC. To run inside a VPC, there are two options: `VPC` and `VPC_FROM_LOOK_UP`. These options are configured using `scripts/configure.sh` described in the next section.
 
-Use `VPC` if you want a single, self-contained pipeline running in a VPC. Not reccomended for use with multiple code pipelines in the same account. The VPC is created using defaulted settings.
+Use `VPC` if you want a single, self-contained pipeline running in a VPC. Not recommended for use with multiple code pipelines in the same account. The VPC is created using defaulted settings.
 
-Use `VPC_FROM_LOOK_UP` to look up an existing VPC based on its vpc ID. It is reccomended to create this VPC prior to deploying the pipeline. Multiple deployments of the pipeline can share the same VPC.
+Use `VPC_FROM_LOOK_UP` to look up an existing VPC based on its vpc ID. It is recommended to create this VPC prior to deploying the pipeline. Multiple deployments of the pipeline can share the same VPC.
 
 Note: Switching between VPC options may require a complete tear down and redeploy of the pipeline
 
@@ -133,13 +133,13 @@ create_compliance_log_bucket $INT_ACCOUNT_AWS_PROFILE $ACCOUNT_INT $AWS_REGION
 #### Prepare the RES stage
 
 ```bash
-cdk bootstrap --profile $RES_ACCOUNT_AWS_PROFILE --qualifier ${CDK_QUALIFIER} aws://${ACCOUNT_RES}/${AWS_REGION}
+npm run cdk bootstrap -- --profile $RES_ACCOUNT_AWS_PROFILE --qualifier ${CDK_QUALIFIER} aws://${ACCOUNT_RES}/${AWS_REGION}
 ```
 
 #### Prepare the DEV stage
 
 ```bash
-cdk bootstrap --profile $DEV_ACCOUNT_AWS_PROFILE  --qualifier ${CDK_QUALIFIER} --cloudformation-execution-policies \
+npm run cdk bootstrap -- --profile $DEV_ACCOUNT_AWS_PROFILE  --qualifier ${CDK_QUALIFIER} --cloudformation-execution-policies \
 arn:aws:iam::aws:policy/AdministratorAccess \
 --trust ${ACCOUNT_RES} aws://${ACCOUNT_DEV}/${AWS_REGION}
 ```
@@ -147,7 +147,7 @@ arn:aws:iam::aws:policy/AdministratorAccess \
 #### Prepare the INT stage
 
 ```bash
-cdk bootstrap --profile $INT_ACCOUNT_AWS_PROFILE --qualifier ${CDK_QUALIFIER} --cloudformation-execution-policies \
+npm run cdk bootstrap -- --profile $INT_ACCOUNT_AWS_PROFILE --qualifier ${CDK_QUALIFIER} --cloudformation-execution-policies \
 arn:aws:iam::aws:policy/AdministratorAccess \
 --trust ${ACCOUNT_RES} aws://${ACCOUNT_INT}/${AWS_REGION}
 ```
@@ -158,7 +158,7 @@ arn:aws:iam::aws:policy/AdministratorAccess \
 *Make sure to check also the AppConfig.ts on how to enable PROD stage as there you also need to export more environment variables which are then used to propagate the ACCOUNT_PROD to the CDK Pipeline.
 
 ```bash
-cdk bootstrap --profile prod --qualifier ${CDK_QUALIFIER} --cloudformation-execution-policies \
+npm run cdk bootstrap -- --profile prod --qualifier ${CDK_QUALIFIER} --cloudformation-execution-policies \
 arn:aws:iam::aws:policy/AdministratorAccess \
 --trust resources_account_id aws://prod_account_id/your_aws_region
 ```
@@ -166,7 +166,7 @@ arn:aws:iam::aws:policy/AdministratorAccess \
 #### Deploy all the stacks
 
 ```bash
-cdk deploy --all --region ${AWS_REGION} --profile $RES_ACCOUNT_AWS_PROFILE --qualifier ${CDK_QUALIFIER}
+npm run cdk deploy -- --all --region ${AWS_REGION} --profile $RES_ACCOUNT_AWS_PROFILE --qualifier ${CDK_QUALIFIER}
 ```
 
 Once the command finishes there will be the following CDK Stacks deployed into your RES Account:
@@ -321,20 +321,20 @@ source exports_vars.sh ### source the env vars with the right account ids and pr
 npm run cdk synth ### this command generates the cdk.context.json
 ### 3. Add the cdk.context.json to git remote
 git add cdk.context.json ### re-add cdk.context.json
-git commit -am "Re-added cdk.context.json"
+git commit -am "feat: re-added cdk.context.json"
 git push -u origin ### Push changes to remote
 
 ```
 
 ### Working with Python dependencies
-The project utilize the [Pipenv](https://pipenv.pypa.io/en/latest/). Pipenv automatically creates and manages a virtualenv for your projects, as well as adds/removes packages from your `Pipfile` as you install/uninstall packages. It also generates a project `Pipfile.lock`, which is used to produce deterministic builds.
+The project utilizes the [Pipenv](https://pipenv.pypa.io/en/latest/). Pipenv automatically creates and manages a virtualenv for your project, as well as adds/removes packages from your `Pipfile` as you install/uninstall packages. It also generates a project `Pipfile.lock`, which is used to produce deterministic builds.
 
-The Python dependencies are maintained in `Pipfile` instead of the `requirements.txt` file and requirements.txt files should not be commited into Git.
+The Python dependencies are maintained in `Pipfile` instead of the `requirements.txt` file and requirements.txt files should not be commited to git.
 
 #### How to install Pipenv
 The recommended approach is to use `pip install pipenv -U` command. More information can be found [here](https://pipenv.pypa.io/en/latest/installation/#installing-pipenv). 
 
-The `pipenv` command is not added to the $PATH by default that need to be done manually. The `pipenv` command location can be determined by executing:
+The `pipenv` command is not added to the $PATH by default, that needs to be done manually. The `pipenv` command location can be determined by executing the following:
 ```bash
 python3 -m site --user-base
 ```
@@ -344,10 +344,10 @@ This will return a value like `/Users/user/Library/Python/3.11`. Then the $PATH 
 export PATH="${PATH}:/Users/user/Library/Python/3.11/bin";
 ```
 
-You can add this your `$HOME/.zshrc` or `$HOME/.bashrc` to have this folder permanently.
+You can add this to your `$HOME/.zshrc` or `$HOME/.bashrc` to have this folder permanently available.
 
 #### Migrating existing `requirements.txt`
-Existing `requirements.txt` can transformed into a `Pipfile` with the `pipenv install` command:
+Existing `requirements.txt` can be transformed into a `Pipfile` with the `pipenv install` command, e.g:
 
 ```bash
 cd path-to-the-module
@@ -418,8 +418,13 @@ The project applies the Day 0 mentality in Security. This means there are clearl
 
 For more information, see [SECURITY](SECURITY.md)
 
-## Common Issues
+## Known Issues
+Check below the list of all the known issues for which we do not yet have a final fix and/or take longer than 1 release cycle to completely fix them:
+- **⚠ CodeCommitRepositoryConstruct: NODEJS_16_X support** If you are using AWS CodeCommit as repository type in your package.json (by setting "repositoryType": "CODECOMMIT") you need to know that we have overriden the Lambda runtime from NODEJS_14_X to NODEJS_16_X and also suppressed the false positive warnings for all the resources coming from the following construct: `CodeCommitRepositoryConstruct` in a separate construct: `CodeCommitRepositoryAspects` utilizing the [Aspects](https://docs.aws.amazon.com/cdk/v2/guide/aspects.html). The NODEJS_16_X runtime will be deprecated on Jun 12, 2024. This means that if you want to deploy new pipelines using CodeCommit the `CodeCommitRepositoryConstruct` will fail to deploy, the existing deployments won't be affected. Until we have a fix the only easy solution is the minimum version overriding from NODEJS_14_X to NODEJS_16_X (the overriding to NODEJS_18_X is not compatible to be done in this way, hence not done).
 
+
+## Common Issues
+Check below the list of potential issues you might encounter due to misconfigurations of your local environment when developing on top of the CICD Boot:
 - When using Cloud9 in RES account and want to deploy the code cross-account then you need to define the profiles for the DEV and INT Account as usual (adding them in the ~/.aws/config). The RES profile can be omitted in this case while doing the initial bootstrap, except for the DEV and INT or PROD stages where the profile is mandatory to establish the trust between the RES account and the other environments (DEV/INT/PROD).
 - `when calling the PutParameter operation: The security token included in the request is invalid`: This usually happens if you use Cloud9. Make sure to disable AWS managed temporary credentials and give the full admin access to your Cloud9 Managed role in order to be able to execute everything necessary. See the screenshot here: ![Disable AWS managed temporary credentials](docs/disable-managed-aws-creds.png "AWS managed temporary credentials")
 - `Resource handler returned message: "Policy contains a statement with one or more invalid principals. (Service: Kms, Status Code: 400, Request ID: a9f9e73b-cf2c-4862-9536-af92aa0ed656)" (RequestToken: 949e9034-f910-7eb3-a4a2-427bc9e676b9, HandlerErrorCode: InvalidRequest)`
@@ -461,9 +466,9 @@ be consistent across those files.
 * `npm run license:macos`               validate the NOTICE file on MacOS systems
 * `npm run lint`                        check for linting issues in the project
 * `npm run lint:fix`                    fix linting issues in the project (do not forget to add & commit the fixed files)
-* `cdk deploy`                          deploy this stack to your default AWS account/region
-* `cdk diff`                            compare deployed stack with current state
-* `cdk synth --all`                     emits the synthesized CloudFormation template for all stacks
+* `npm run cdk deploy`                  deploy this stack to your default AWS account/region
+* `npm run cdk diff`                    compare deployed stack with current state
+* `npm run cdk synth -- --all`          emits the synthesized CloudFormation template for all stacks
 
 ## Pointers to external documentation
 

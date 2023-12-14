@@ -7,7 +7,7 @@ set -e
 ################################################################################
 #### Configuration Section
 ################################################################################
-SEMGREP_VERSION="1.41.0";
+SEMGREP_VERSION="1.52.0";
 SHELLCHECK_VERSION="0.9.0.6";
 BANDIT_VERSION="1.7.5";
 
@@ -69,6 +69,7 @@ function initalize_security_env() {
 
     . $WORK_DIR/venv/bin/activate;
 
+    # Upgrading local pip version in the venv
     $PYTHON_COMMAND -m pip install --upgrade pip > /dev/null;
 }
 
@@ -88,7 +89,7 @@ function install_python_dependency() {
 function report_location() {
     ## On CI/CD generate reports always
     if [[ -z "$JUNIT_REPORT" ]]; then
-        if [ ! -z $CODEBUILD_BUILD_ID ] || [ -z $CODEBUILD_BUILD_ID ]; then
+        if [ ! -z $CODEBUILD_BUILD_ID ] || [ ! -z $GITHUB_ACTIONS ]; then
             JUNIT_REPORT="ci";
         fi
     fi
