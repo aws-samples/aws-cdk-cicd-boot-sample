@@ -321,20 +321,20 @@ source exports_vars.sh ### source the env vars with the right account ids and pr
 npm run cdk synth ### this command generates the cdk.context.json
 ### 3. Add the cdk.context.json to git remote
 git add cdk.context.json ### re-add cdk.context.json
-git commit -am "Re-added cdk.context.json"
+git commit -am "feat: re-added cdk.context.json"
 git push -u origin ### Push changes to remote
 
 ```
 
 ### Working with Python dependencies
-The project utilize the [Pipenv](https://pipenv.pypa.io/en/latest/). Pipenv automatically creates and manages a virtualenv for your projects, as well as adds/removes packages from your `Pipfile` as you install/uninstall packages. It also generates a project `Pipfile.lock`, which is used to produce deterministic builds.
+The project utilizes the [Pipenv](https://pipenv.pypa.io/en/latest/). Pipenv automatically creates and manages a virtualenv for your project, as well as adds/removes packages from your `Pipfile` as you install/uninstall packages. It also generates a project `Pipfile.lock`, which is used to produce deterministic builds.
 
-The Python dependencies are maintained in `Pipfile` instead of the `requirements.txt` file and requirements.txt files should not be commited into Git.
+The Python dependencies are maintained in `Pipfile` instead of the `requirements.txt` file and requirements.txt files should not be commited to git.
 
 #### How to install Pipenv
 The recommended approach is to use `pip install pipenv -U` command. More information can be found [here](https://pipenv.pypa.io/en/latest/installation/#installing-pipenv). 
 
-The `pipenv` command is not added to the $PATH by default that need to be done manually. The `pipenv` command location can be determined by executing:
+The `pipenv` command is not added to the $PATH by default, that needs to be done manually. The `pipenv` command location can be determined by executing the following:
 ```bash
 python3 -m site --user-base
 ```
@@ -344,10 +344,10 @@ This will return a value like `/Users/user/Library/Python/3.11`. Then the $PATH 
 export PATH="${PATH}:/Users/user/Library/Python/3.11/bin";
 ```
 
-You can add this your `$HOME/.zshrc` or `$HOME/.bashrc` to have this folder permanently.
+You can add this to your `$HOME/.zshrc` or `$HOME/.bashrc` to have this folder permanently available.
 
 #### Migrating existing `requirements.txt`
-Existing `requirements.txt` can transformed into a `Pipfile` with the `pipenv install` command:
+Existing `requirements.txt` can be transformed into a `Pipfile` with the `pipenv install` command, e.g:
 
 ```bash
 cd path-to-the-module
