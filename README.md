@@ -424,7 +424,7 @@ Check below the list of all the known issues for which we do not yet have a fina
 
 
 ## Common Issues
-Check below the list of potential issues you might encounter due to misconfigurations of your local environment when developing on top of the Vanilla Pipeline:
+Check below the list of potential issues you might encounter due to misconfigurations of your local environment when developing on top of the CICD Boot:
 - When using Cloud9 in RES account and want to deploy the code cross-account then you need to define the profiles for the DEV and INT Account as usual (adding them in the ~/.aws/config). The RES profile can be omitted in this case while doing the initial bootstrap, except for the DEV and INT or PROD stages where the profile is mandatory to establish the trust between the RES account and the other environments (DEV/INT/PROD).
 - `when calling the PutParameter operation: The security token included in the request is invalid`: This usually happens if you use Cloud9. Make sure to disable AWS managed temporary credentials and give the full admin access to your Cloud9 Managed role in order to be able to execute everything necessary. See the screenshot here: ![Disable AWS managed temporary credentials](docs/disable-managed-aws-creds.png "AWS managed temporary credentials")
 - `Resource handler returned message: "Policy contains a statement with one or more invalid principals. (Service: Kms, Status Code: 400, Request ID: a9f9e73b-cf2c-4862-9536-af92aa0ed656)" (RequestToken: 949e9034-f910-7eb3-a4a2-427bc9e676b9, HandlerErrorCode: InvalidRequest)`
