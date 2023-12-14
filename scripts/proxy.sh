@@ -1,6 +1,8 @@
 #!/bin/bash
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved. SPDX-License-Identifier: MIT-0
 
+set -e
+
 # Create the configuration. This way Docker containers will use the proxy
 
 if [[ -z "${HTTP_PROXY}" ]]; then

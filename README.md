@@ -133,13 +133,13 @@ create_compliance_log_bucket $INT_ACCOUNT_AWS_PROFILE $ACCOUNT_INT $AWS_REGION
 #### Prepare the RES stage
 
 ```bash
-cdk bootstrap --profile $RES_ACCOUNT_AWS_PROFILE --qualifier ${CDK_QUALIFIER} aws://${ACCOUNT_RES}/${AWS_REGION}
+npm run cdk bootstrap -- --profile $RES_ACCOUNT_AWS_PROFILE --qualifier ${CDK_QUALIFIER} aws://${ACCOUNT_RES}/${AWS_REGION}
 ```
 
 #### Prepare the DEV stage
 
 ```bash
-cdk bootstrap --profile $DEV_ACCOUNT_AWS_PROFILE  --qualifier ${CDK_QUALIFIER} --cloudformation-execution-policies \
+npm run cdk bootstrap -- --profile $DEV_ACCOUNT_AWS_PROFILE  --qualifier ${CDK_QUALIFIER} --cloudformation-execution-policies \
 arn:aws:iam::aws:policy/AdministratorAccess \
 --trust ${ACCOUNT_RES} aws://${ACCOUNT_DEV}/${AWS_REGION}
 ```
@@ -147,7 +147,7 @@ arn:aws:iam::aws:policy/AdministratorAccess \
 #### Prepare the INT stage
 
 ```bash
-cdk bootstrap --profile $INT_ACCOUNT_AWS_PROFILE --qualifier ${CDK_QUALIFIER} --cloudformation-execution-policies \
+npm run cdk bootstrap -- --profile $INT_ACCOUNT_AWS_PROFILE --qualifier ${CDK_QUALIFIER} --cloudformation-execution-policies \
 arn:aws:iam::aws:policy/AdministratorAccess \
 --trust ${ACCOUNT_RES} aws://${ACCOUNT_INT}/${AWS_REGION}
 ```
@@ -158,7 +158,7 @@ arn:aws:iam::aws:policy/AdministratorAccess \
 *Make sure to check also the AppConfig.ts on how to enable PROD stage as there you also need to export more environment variables which are then used to propagate the ACCOUNT_PROD to the CDK Pipeline.
 
 ```bash
-cdk bootstrap --profile prod --qualifier ${CDK_QUALIFIER} --cloudformation-execution-policies \
+npm run cdk bootstrap -- --profile prod --qualifier ${CDK_QUALIFIER} --cloudformation-execution-policies \
 arn:aws:iam::aws:policy/AdministratorAccess \
 --trust resources_account_id aws://prod_account_id/your_aws_region
 ```
@@ -166,7 +166,7 @@ arn:aws:iam::aws:policy/AdministratorAccess \
 #### Deploy all the stacks
 
 ```bash
-cdk deploy --all --region ${AWS_REGION} --profile $RES_ACCOUNT_AWS_PROFILE --qualifier ${CDK_QUALIFIER}
+npm run cdk deploy -- --all --region ${AWS_REGION} --profile $RES_ACCOUNT_AWS_PROFILE --qualifier ${CDK_QUALIFIER}
 ```
 
 Once the command finishes there will be the following CDK Stacks deployed into your RES Account:
@@ -418,8 +418,13 @@ The project applies the Day 0 mentality in Security. This means there are clearl
 
 For more information, see [SECURITY](SECURITY.md)
 
-## Common Issues
+## Known Issues
+Check below the list of all the known issues for which we do not yet have a final fix and/or take longer than 1 release cycle to completely fix them:
+- **⚠ CodeCommitRepositoryConstruct: NODEJS_16_X support** If you are using AWS CodeCommit as repository type in your package.json (by setting "repositoryType": "CODECOMMIT") you need to know that we have overriden the Lambda runtime from NODEJS_14_X to NODEJS_16_X and also suppressed the false positive warnings for all the resources coming from the following construct: `CodeCommitRepositoryConstruct` in a separate construct: `CodeCommitRepositoryAspects` utilizing the [Aspects](https://docs.aws.amazon.com/cdk/v2/guide/aspects.html). The NODEJS_16_X runtime will be deprecated on Jun 12, 2024, please check [here](https://docs.aws.amazon.com/lambda/latest/dg/lambda-nodejs.html) for more info. This means that if you want to deploy new pipelines using CodeCommit the `CodeCommitRepositoryConstruct` will fail to deploy, the existing deployments won't be affected. In the meantime we will be working on a fix for this issue [here](https://github.com/dpp-epo-harvesting/harvesting-vanilla-pipeline/issues/153), for now the only easy solution is the minimum version overriding from NODEJS_14_X to NODEJS_16_X (the overriding to NODEJS_18_X is not compatible to be done in this way, hence not done).
 
+
+## Common Issues
+Check below the list of potential issues you might encounter due to misconfigurations of your local environment when developing on top of the Vanilla Pipeline:
 - When using Cloud9 in RES account and want to deploy the code cross-account then you need to define the profiles for the DEV and INT Account as usual (adding them in the ~/.aws/config). The RES profile can be omitted in this case while doing the initial bootstrap, except for the DEV and INT or PROD stages where the profile is mandatory to establish the trust between the RES account and the other environments (DEV/INT/PROD).
 - `when calling the PutParameter operation: The security token included in the request is invalid`: This usually happens if you use Cloud9. Make sure to disable AWS managed temporary credentials and give the full admin access to your Cloud9 Managed role in order to be able to execute everything necessary. See the screenshot here: ![Disable AWS managed temporary credentials](docs/disable-managed-aws-creds.png "AWS managed temporary credentials")
 - `Resource handler returned message: "Policy contains a statement with one or more invalid principals. (Service: Kms, Status Code: 400, Request ID: a9f9e73b-cf2c-4862-9536-af92aa0ed656)" (RequestToken: 949e9034-f910-7eb3-a4a2-427bc9e676b9, HandlerErrorCode: InvalidRequest)`
@@ -461,9 +466,9 @@ be consistent across those files.
 * `npm run license:macos`               validate the NOTICE file on MacOS systems
 * `npm run lint`                        check for linting issues in the project
 * `npm run lint:fix`                    fix linting issues in the project (do not forget to add & commit the fixed files)
-* `cdk deploy`                          deploy this stack to your default AWS account/region
-* `cdk diff`                            compare deployed stack with current state
-* `cdk synth --all`                     emits the synthesized CloudFormation template for all stacks
+* `npm run cdk deploy`                  deploy this stack to your default AWS account/region
+* `npm run cdk diff`                    compare deployed stack with current state
+* `npm run cdk synth -- --all`          emits the synthesized CloudFormation template for all stacks
 
 ## Pointers to external documentation
 

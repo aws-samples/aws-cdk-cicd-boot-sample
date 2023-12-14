@@ -4,4 +4,4 @@
 set -e
 
 npm run cdk context
-npm run cdk synth -- --no-lookup
+npm run cdk synth -- --no-lookups

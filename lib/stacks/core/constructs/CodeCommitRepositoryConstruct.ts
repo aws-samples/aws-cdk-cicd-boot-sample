@@ -11,6 +11,7 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as pipelines from 'aws-cdk-lib/pipelines';
 import * as nag from 'cdk-nag';
 import { Construct } from 'constructs';
+import { CodeCommitRepositoryAspects } from './CodeCommitRepositoryAspects';
 import { ICodeCommitConfig } from '../../../../config/Types';
 import { CDKPipeline } from '../../../cdk-pipeline/core/CDKPipeline';
 import { SSMParameterStack } from '../SSMParameterStack';
@@ -41,54 +42,62 @@ export class CodeCommitRepositoryConstruct extends Construct {
       });
     }
 
-    const approvalRuleTemplateName = new ApprovalRuleTemplate(this, 'ApprovalRuleTemplate', {
-      approvalRuleTemplateName: `${props.applicationName}-Require-1-Approver`,
-      template: {
-        approvers: {
-          numberOfApprovalsNeeded: 1,
-        },
-      },
-    }).approvalRuleTemplateName;
-
-    new ApprovalRuleTemplateRepositoryAssociation(this, 'ApprovalRuleTemplateRepositoryAssociation', {
-      approvalRuleTemplateName,
-      repository,
-    });
-
-    const pullRequestCheck = new PullRequestCheck(this, 'PullRequestCheck', {
-      repository,
-      buildSpec: codebuild.BuildSpec.fromObject({
-        version: '0.2',
-        phases: {
-          install: {
-            commands: [
-              ...CDKPipeline.installCommands,
-              `export CDK_QUALIFIER=${props.applicationQualifier}`,
-            ],
-          },
-          build: {
-            commands: CDKPipeline.pipelineCommands,
+    // The Lambda Runtimes has been updated by the CodeCommitRepositoryAspects,
+    // with this method the false warnings have been suppressed
+    suppressDeprecationWarning(() => {
+      const approvalRuleTemplateName = new ApprovalRuleTemplate(this, 'ApprovalRuleTemplate', {
+        approvalRuleTemplateName: `${props.applicationName}-Require-1-Approver`,
+        template: {
+          approvers: {
+            numberOfApprovalsNeeded: 1,
           },
         },
-      }),
-      privileged: props.codeBuildConfig.isPrivileged,
-      buildImage: props.codeBuildConfig.buildImage,
+      }).approvalRuleTemplateName;
+
+      new ApprovalRuleTemplateRepositoryAssociation(this, 'ApprovalRuleTemplateRepositoryAssociation', {
+        approvalRuleTemplateName,
+        repository,
+      });
+
+      const pullRequestCheck = new PullRequestCheck(this, 'PullRequestCheck', {
+        repository,
+        buildSpec: codebuild.BuildSpec.fromObject({
+          version: '0.2',
+          phases: {
+            install: {
+              commands: [
+                ...CDKPipeline.installCommands,
+                `export CDK_QUALIFIER=${props.applicationQualifier}`,
+              ],
+            },
+            build: {
+              commands: CDKPipeline.pipelineCommands,
+            },
+          },
+        }),
+        privileged: props.codeBuildConfig.isPrivileged,
+        buildImage: props.codeBuildConfig.buildImage,
+      });
+
+      pullRequestCheck.addToRolePolicy(
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: [
+            'sts:AssumeRole',
+          ],
+          resources: [
+            'arn:aws:iam::*:role/cdk-*-lookup-role-*',
+          ],
+        }),
+      );
+
+      pullRequestCheck.addToRolePolicy(
+        SSMParameterStack.getGetParameterPolicyStatement(cdk.Stack.of(this).account, cdk.Stack.of(this).region, props.applicationQualifier ),
+      );
     });
 
-    pullRequestCheck.addToRolePolicy(
-      new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: [
-          'sts:AssumeRole',
-        ],
-        resources: [
-          'arn:aws:iam::*:role/cdk-*-lookup-role-*',
-        ],
-      }),
-    );
-
-    pullRequestCheck.addToRolePolicy(
-      SSMParameterStack.getGetParameterPolicyStatement(cdk.Stack.of(this).account, cdk.Stack.of(this).region, props.applicationQualifier ),
+    cdk.Aspects.of(cdk.Stack.of(this)).add(
+      new CodeCommitRepositoryAspects(),
     );
 
     nag.NagSuppressions.addResourceSuppressions(this, [
@@ -116,3 +125,14 @@ export class CodeCommitRepositoryConstruct extends Construct {
     ], true);
   }
 }
+function suppressDeprecationWarning(block: () => void) {
+  const originalJsiiSettings = process.env.JSII_DEPRECATED;
+
+  process.env.JSII_DEPRECATED = 'quiet';
+  try {
+    block();
+  } finally {
+    process.env.JSII_DEPRECATED = originalJsiiSettings;
+  }
+}
+

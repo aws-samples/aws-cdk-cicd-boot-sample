@@ -14,7 +14,7 @@ export class PythonLambdaLayer extends lambda.LayerVersion {
     super(scope, id, {
       code: lambda.Code.fromAsset(props.folderPath, {
         bundling: {
-          image: lambda.Runtime.PYTHON_3_11.bundlingImage,
+          image: lambda.Runtime.PYTHON_3_12.bundlingImage,
           command: [
             'bash', '-c',
             // create a new virtualenv for python to use
@@ -29,7 +29,7 @@ export class PythonLambdaLayer extends lambda.LayerVersion {
           ],
         },
       }),
-      compatibleRuntimes: [lambda.Runtime.PYTHON_3_11],
+      compatibleRuntimes: [lambda.Runtime.PYTHON_3_11, lambda.Runtime.PYTHON_3_12],
       description: props.description,
     });
   }

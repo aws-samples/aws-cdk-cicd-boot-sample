@@ -6,9 +6,6 @@
 # 
 ##
 ROOT_DIR=$(pwd)
-layer_folders=(
-    "${ROOT_DIR}/src/lambda-layer/common"
-)
 
 echo "Scanning for vulnerabilities in dependencies in Python"
 
@@ -42,8 +39,16 @@ $PYTHON_EXECUTABLE -m venv "$WORK_DIR/venv" > /dev/null;
 . $WORK_DIR/venv/bin/activate;
 pip install pip-audit pipenv > /dev/null;
 
-for layer_folder in "${layer_folders[@]}"; do
-    pushd "${layer_folder}" || exit 1;
+REQUIREMENTS=`find ${ROOT_DIR} -type f -name Pipfile -not -path "*/node_modules/*" -not -path "*/cdk.out/*"`;
+
+if [ -z "$REQUIREMENTS" ]; then
+    echo "No Pipfiles found."
+    exit 0;
+fi
+
+for pythonModule in "${REQUIREMENTS[@]}"; do
+    pythonModuleFolder=`dirname $pythonModule`;
+    pushd "${pythonModuleFolder}" || exit 1;
     pipenv requirements --exclude-markers --hash > requirements.txt && pip-audit -r requirements.txt --disable-pip && rm -rf requirements.txt;
     popd || exit 1;
 done
