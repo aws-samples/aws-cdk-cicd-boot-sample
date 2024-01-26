@@ -25,7 +25,7 @@ export class PythonLambdaLayer extends lambda.LayerVersion {
             'chmod -R 777 /tmp/pip-cache &&' +
             'export PIP_CACHE_DIR=/tmp/pip-cache &&' +
             'export PATH="/tmp/venv/bin:$PATH" &&' +
-            'pip install pipenv && pipenv requirements > requirements.txt && pip install --platform manylinux2014_x86_64 --only-binary=:all: -r requirements.txt -t /asset-output/python',
+            'pip install pipenv && pipenv requirements > requirements.txt && pip install --platform manylinux2014_x86_64 --only-binary=:all: -r requirements.txt -t /asset-output/python && rm -rf requirements.txt',
           ],
         },
       }),

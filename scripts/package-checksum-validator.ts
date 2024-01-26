@@ -5,7 +5,8 @@
 
 import { createHash } from 'crypto';
 import { readFileSync } from 'fs';
-import * as expectedHashes from '../package-verification.json';
+
+const expectedHashes = JSON.parse(readFileSync('./package-verification.json', { encoding: 'utf-8' }));
 
 const validateChecksum = (filePath: string, expectedHash: string) => {
   const checksum = createHash('sha256');

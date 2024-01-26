@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MIT-0
 
 import { createHash } from 'crypto';
-import { readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
+
+const VERIFICATION_FILE = './package-verification.json';
 
 const generateChecksum = (filePath: string) => {
   const checksum = createHash('sha256');
@@ -10,9 +12,15 @@ const generateChecksum = (filePath: string) => {
   const hexCheckSum = checksum.digest('hex');
   /* eslint-disable no-console */
   console.log(hexCheckSum);
-  const checkSumMessage = { 'package-lock.json': hexCheckSum };
 
-  writeFileSync('./package-verification.json', JSON.stringify(checkSumMessage));
+  let checkSumState: Record<string, string> = {};
+  if (existsSync(VERIFICATION_FILE)) {
+    checkSumState = JSON.parse(readFileSync(VERIFICATION_FILE, { encoding: 'utf8' })) as Record<string, string>;
+  }
+
+  checkSumState['package-lock.json'] = hexCheckSum;
+
+  writeFileSync(VERIFICATION_FILE, JSON.stringify(checkSumState, null, 2));
 };
 
 generateChecksum('./package-lock.json');

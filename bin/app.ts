@@ -64,6 +64,7 @@ new PipelineStack(app, `${AppConfig.applicationName}PipelineStack`, {
     isDockerEnabledForSynth: AppConfig.codeBuildEnvSettings.isPrivileged,
     buildImage: AppConfig.codeBuildEnvSettings.buildImage,
     branch: repositoryStack.repositoryBranch,
+    primaryOutputDirectory: AppConfig.codeBuildEnvSettings.synthOutputDirectory,
     pipelineVariables: {
       ...repositoryStack.pipelineEnvVars,
       PROXY_SECRET_ARN: AppConfig.proxy?.proxySecretArn ?? '',

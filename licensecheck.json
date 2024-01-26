@@ -9,6 +9,7 @@
         "excludedSubProjects": []
     },
     "python": {
+        "allowedTypes": ["Pipenv"],
         "excluded": [],
         "excludedSubProjects": []
     }

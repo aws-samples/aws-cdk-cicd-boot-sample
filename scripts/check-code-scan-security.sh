@@ -13,7 +13,7 @@ BANDIT_VERSION="1.7.5";
 
 SCRIPT=$(readlink -f $0);
 SCRIPTPATH=`dirname $SCRIPT`;
-PROJECT_ROOT="${SCRIPTPATH}/..";
+PROJECT_ROOT="${CURRENT_PATH}"; # It is assumed that the command is executed in the project root folder. Default behavior of the NPM run.
 
 PYTHON_COMMAND="python";
 if [[ "$(python3 -V)" =~ "Python 3" ]]; then

@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT-0
 """
 This is the python code triggered in the cdk pipeline post deployment.
 The script can be modified to execute post-deploy fixes which cannot be done through CDK but have to be done in SDK, e.g: fix log group retention days
-This env var is defined in the `lib/pipeline-stack.ts`
+This env var is defined in the `lib/cdk-pipeline/core/PostDeployBuildStep.ts`
 """
 
 import boto3
@@ -36,5 +36,3 @@ def perform_fixes(stage,region=None):
 if __name__ == '__main__':
     stage = os.environ.get("STAGE")
     region = os.environ.get("TARGET_REGION")
-
-    perform_fixes(stage,region)

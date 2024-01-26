@@ -10,6 +10,7 @@ import { CodeGuruSeverityThreshold } from '../lib/cdk-pipeline/core/constructs/C
 export const codeBuildEnvSettings: ICodeBuildEnvSettings = {
   isPrivileged: true,
   buildImage: codebuild.LinuxBuildImage.STANDARD_7_0,
+  synthOutputDirectory: Environment.getEnvVar('npm_package_config_synthOutputDirectory', './cdk.out'),
 };
 
 const region: string = Environment.getEnvVar('AWS_REGION');
