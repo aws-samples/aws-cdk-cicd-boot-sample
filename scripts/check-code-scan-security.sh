@@ -11,6 +11,7 @@ SEMGREP_VERSION="1.52.0";
 SHELLCHECK_VERSION="0.9.0.6";
 BANDIT_VERSION="1.7.5";
 
+CURRENT_PATH=`pwd`;
 SCRIPT=$(readlink -f $0);
 SCRIPTPATH=`dirname $SCRIPT`;
 PROJECT_ROOT="${CURRENT_PATH}"; # It is assumed that the command is executed in the project root folder. Default behavior of the NPM run.
