@@ -236,6 +236,7 @@ To update the NOTICE file locally you need to run the following command:
 ```bash
 npm run audit:fix:license
 ```
+
 **Note**
 This will only result with new Notice file generation in case any of the `package.json` for NPM, `Pipfile` and `requirements.txt` for Python projects has been modified. While the files are untouched the license is considered up to date.
 
@@ -265,7 +266,6 @@ Example configuration:
 * Dependencies can be excluded from the license verification for NPM and Python as well.
 * Python has many package management solution. The Vanilla Pipeline supports `Pipenv` and the regular `requirements.txt`
  files. With the ```licensecheck.json``` file `python.allowedTypes` allows to configure which packageManager package types considered. The values are `Pipenv`, and the `requirements.txt`. 
-
 
 ## Appendix
 
@@ -441,7 +441,7 @@ be consistent across those files.
 - If you have already deployed RES/DEV/INT and want to disable INT then please do the following:
   ```bash
   export ACCOUNT_INT="-"
-  cdk deploy --all --region ${AWS_REGION} --profile $RES_ACCOUNT_AWS_PROFILE --qualifier ${CDK_QUALIFIER}
+  npm run cdk deploy -- --all --region ${AWS_REGION} --profile $RES_ACCOUNT_AWS_PROFILE --qualifier ${CDK_QUALIFIER}
   ```
   After performing this please do not forget to delete your CloudFormation resources on the previous INT Account.
 - `validation error detected: Value 'log-retention-..........-.......-...-DEV' at 'roleName' failed to satisfy constraint: Member must have length less than or equal to 64`: This usually happens if you use longer `applicationName` in the `config/AppConfig.ts` than 20 characters. In this case, you either use different application name or modify the log retention role in the [LogRetentionRoleStack](lib/stacks/core/LogRetentionRoleStack.ts).
@@ -467,7 +467,7 @@ be consistent across those files.
 * `npm run license:macos`               validate the NOTICE file on MacOS systems
 * `npm run lint`                        check for linting issues in the project
 * `npm run lint:fix`                    fix linting issues in the project (do not forget to add & commit the fixed files)
-* `npm run cdk deploy`                  deploy this stack to your default AWS account/region
+* `npm run cdk deploy -- --all`         deploy all stacks to your configured AWS account/region
 * `npm run cdk diff`                    compare deployed stack with current state
 * `npm run cdk synth -- --all`          emits the synthesized CloudFormation template for all stacks
 
