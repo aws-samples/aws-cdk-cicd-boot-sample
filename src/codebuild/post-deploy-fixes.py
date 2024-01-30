@@ -36,3 +36,5 @@ def perform_fixes(stage,region=None):
 if __name__ == '__main__':
     stage = os.environ.get("STAGE")
     region = os.environ.get("TARGET_REGION")
+
+    perform_fixes(stage,region)

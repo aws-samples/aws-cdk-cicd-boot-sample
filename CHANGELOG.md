@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 In this release we have included bugfixes and also refactored the License checking. To cleanup the non-used docker image for the license checker, please run the following command `docker rmi aws/codebuild/standard:7.0` and then re-run `npm run audit:fix:license` and follow the steps in the README.md.
 
 ### Added
-- Allowed modifying the location of the synthesized stacks with the `primaryOutputDirectory` attribute. This allows the VP to be placed into a subdirectory in a repository. That results in a cleaner directory structure where the root directory can focus on the business problem, while the Vanilla Pipeline will be present only as a sidecar and enable the CI/CD process.
+- Allowed modifying the location of the synthesized stacks with the `primaryOutputDirectory` attribute. This allows the VP to be placed into a subdirectory in a repository. That results in a cleaner directory structure where the root directory can focus on the business problem, while the CICD Boot will be present only as a sidecar and enable the CI/CD process.
 ### Changed
 - Removed outdated S3 Resource Policy enforcements (`DenyUnEncryptedObjectUploads`) from bin/aspects.ts. This is handled from Amazon S3, [here](https://docs.aws.amazon.com/AmazonS3/latest/userguide/default-encryption-faq.html) the official documentation (all new objects are automatically encrypted by default).
 - Removed `fix_log_groups` from src/codebuild/post-deploy-fixes.py as this is only Porsche EPO specific and doesn't apply to all the other EPOs.
