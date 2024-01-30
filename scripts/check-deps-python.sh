@@ -3,7 +3,7 @@
 
 ##
 # Make sure to add a new path to the requirements.txt in case you add a new path
-# 
+#
 ##
 ROOT_DIR=$(pwd)
 
@@ -39,7 +39,8 @@ $PYTHON_EXECUTABLE -m venv "$WORK_DIR/venv" > /dev/null;
 . $WORK_DIR/venv/bin/activate;
 pip install pip-audit pipenv > /dev/null;
 
-REQUIREMENTS=`find ${ROOT_DIR} -type f -name Pipfile -not -path "*/node_modules/*" -not -path "*/cdk.out/*"`;
+REQUIREMENTS=($(find "${ROOT_DIR}" -type f -name 'Pipfile' -not -path "*/node_modules/*" -not -path "*/cdk.out/*"))
+echo "Matching requirements found : ${#REQUIREMENTS[@]}"
 
 if [ -z "$REQUIREMENTS" ]; then
     echo "No Pipfiles found."

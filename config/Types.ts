@@ -8,6 +8,7 @@ import { CodeGuruSeverityThreshold } from '../lib/cdk-pipeline/core/constructs/C
 export interface ICodeBuildEnvSettings {
   isPrivileged: boolean;
   buildImage: codebuild.IBuildImage;
+  synthOutputDirectory: string;
 }
 
 export type DeploymentStage = Exclude<STAGE, 'PROD'>; // remove Exclude statement to add PROD stage to deployments

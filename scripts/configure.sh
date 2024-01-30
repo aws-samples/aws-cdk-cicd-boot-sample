@@ -10,7 +10,7 @@ set -e
 CURRENT_PATH=`pwd`
 SCRIPT=$(readlink -f "$0")
 SCRIPTPATH=`dirname "$SCRIPT"`
-PROJECT_ROOT="${SCRIPTPATH}/.."
+PROJECT_ROOT="${CURRENT_PATH}"; # It is assumed that the command is executed in the project root folder. Default behavior of the NPM run.
 
 # TEMPLATE
 PACKAGE_JSON_TEMPLATE="$PROJECT_ROOT/package.json"

@@ -1,0 +1,5 @@
+node_modules
+# folder that contains the compiled TypeScript code. ###
+
+# ESLint must be disabled while the https://github.com/adaltas/node-csv/issues/323 has not been solved
+scripts/check-licenses.*

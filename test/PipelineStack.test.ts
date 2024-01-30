@@ -38,6 +38,7 @@ describe('pipeline-stack-test-codecommit', () => {
         isDockerEnabledForSynth: TestAppConfig.codeBuildEnvSettings.isPrivileged,
         buildImage: TestAppConfig.codeBuildEnvSettings.buildImage,
         branch: repository.repositoryBranch,
+        primaryOutputDirectory: TestAppConfig.codeBuildEnvSettings.synthOutputDirectory,
         pipelineVariables: {
           ...repository.pipelineEnvVars,
           PROXY_SECRET_ARN: TestAppConfig.proxy?.proxySecretArn ?? '',
@@ -141,6 +142,7 @@ describe('pipeline-stack-test-codestar', () => {
         isDockerEnabledForSynth: TestAppConfig.codeBuildEnvSettings.isPrivileged,
         buildImage: TestAppConfig.codeBuildEnvSettings.buildImage,
         branch: repository.repositoryBranch,
+        primaryOutputDirectory: TestAppConfig.codeBuildEnvSettings.synthOutputDirectory,
         pipelineVariables: {
           ...repository.pipelineEnvVars,
           PROXY_SECRET_ARN: TestAppConfig.proxy?.proxySecretArn ?? '',

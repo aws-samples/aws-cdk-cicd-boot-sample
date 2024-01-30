@@ -8,6 +8,7 @@ import { CodeGuruSeverityThreshold } from '../lib/cdk-pipeline/core/constructs/C
 const codeBuildEnvSettings: ICodeBuildEnvSettings = {
   isPrivileged: true,
   buildImage: codebuild.LinuxBuildImage.STANDARD_7_0,
+  synthOutputDirectory: './cdk.out',
 };
 
 export const TestAppConfig: IAppConfig = {

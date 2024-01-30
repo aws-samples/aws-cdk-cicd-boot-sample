@@ -49,20 +49,6 @@ export class SecurityControls implements IAspect {
       }
       node.addToResourcePolicy(
         new PolicyStatement({
-          sid: 'DenyUnEncryptedObjectUploads',
-          effect: Effect.DENY,
-          principals: [new AnyPrincipal()],
-          actions: ['s3:PutObject'],
-          resources: [`${node.bucketArn}/*`],
-          conditions: {
-            StringNotEquals: {
-              's3:x-amz-server-side-encryption': 'aws:kms',
-            },
-          },
-        }),
-      );
-      node.addToResourcePolicy(
-        new PolicyStatement({
           sid: 'DenyHTTP',
           effect: Effect.DENY,
           principals: [new AnyPrincipal()],

@@ -5,10 +5,12 @@ SPDX-License-Identifier: MIT-0
 
 """
 This is the python code triggered in the cdk pipeline post deployment.
-The script can be modified to execute post-deploy tests which would be, e.g: Load Testing after all the resources have been deployed
-This env var is defined in the `lib/pipeline-stack.ts`
+For describing all the log groups in the target account and add log log_groups definition.
+The scripts assumes a role that is created in the `lib/test-role.ts` and the role name is passed as env var;
+This env var is defined in the `lib/cdk-pipeline/core/PostDeployBuildStep.ts`
 """
 import boto3
+from botocore.config import Config
 import logging
 import os
 
@@ -28,7 +30,7 @@ def perform_tests(stage,region=None):
         region = os.environ["AWS_REGION"]
         LOGGER.info(f"Region is not defined, using the region from codebuild environment {region}")
 
-    ### Do some tests with the acquired session
+    ### Do some fixes with the acquired session
     print(stage)
     print(region)
 

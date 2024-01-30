@@ -1,5 +1,5 @@
 #########################
-# Node Module: "."
+# NPM module: package.json
 #########################
 "License","Count"
 "(MIT OR Apache-2.0)","1"
@@ -9,15 +9,16 @@
 "Apache-2.0","23"
 "BSD-2-Clause","11"
 "BSD-3-Clause","18"
+"BlueOak-1.0.0","2"
 "CC-BY-3.0","1"
 "CC-BY-4.0","1"
 "CC0-1.0","1"
-"ISC","49"
-"MIT","520"
+"ISC","56"
 "MIT*","2"
+"MIT","533"
 "Python-2.0","1"
 #########################
-# Python Module: "./src/lambda-layer/common"
+# Python module: src/lambda-layer/common/Pipfile
 #########################
 "License","Count"
 "Apache Software License","3"

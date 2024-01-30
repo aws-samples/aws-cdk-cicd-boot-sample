@@ -32,6 +32,7 @@ export interface PipelineProps {
   codeGuruScanThreshold?: CodeGuruSeverityThreshold;
   vpcProps?: VpcProps;
   pipelineVariables?: {[key in string]: string};
+  primaryOutputDirectory: string;
 }
 
 // ensure that VPC is detached from codebuild project on VPC deletion
@@ -78,7 +79,7 @@ export class CDKPipeline extends pipelines.CodePipeline {
           AWS_REGION: cdk.Stack.of(scope).region,
           ...props.pipelineVariables,
         },
-        primaryOutputDirectory: './cdk.out',
+        primaryOutputDirectory: props.primaryOutputDirectory,
       }),
       codeBuildDefaults: {
         ...CDKPipeline.generateVPCCodeBuildDefaults(scope, props.vpcProps),

@@ -227,9 +227,9 @@ NOTICE file **must** be kept up to date in the repository.
 
 NOTICE file consistency is tested by the `npm run audit:license`, this script is included into the CodePipeline Build step to ensure the NOTICE file is always up-to-date.
 
-The script checks dependencies in `package.json` for NPM and `requirements.txt` for Python projects. In case, you are using other package managers, you need to manage those dependencies by **yourself** as long as that is not supported by CICD Boot.
+The script checks dependencies in `package.json` for NPM, `Pipfile` and `requirements.txt` for Python projects. In case, you are using other package managers, you need to manage those dependencies by **yourself** as long as that is not supported by CICD Boot.
 
-The used dependencies can be dependent on the Operating System and the runtime environment so for this reason the NOTICE file must contain everything that we distribute to the customer, i.e. everything that is installed by us in the customer's AWS account. We build a Docker image based on the CodeBuild Image to ensure the environment where the license checker runs is similar to the pipeline one. Running ```npm run audit:fix:license``` locally will give the same result as using it in the pipeline, to ensure that, based on your OS the dependency collection is executed inside a Docker container that provides similar environment to the CodeBuild.
+The used dependencies can be dependent on the Operating System and the runtime environment so for this reason the NOTICE file can be different in case it is generated on a different location.
 
 To update the NOTICE file locally you need to run the following command:
 
@@ -237,9 +237,8 @@ To update the NOTICE file locally you need to run the following command:
 npm run audit:fix:license
 ```
 
-The script is building an `aws/codebuild/standard:7.0` docker image and running the command inside of it to generate the NOTICE file.
-
-#### Note: The [aws/codebuild/standard:7.0](./utils/license-checker/Dockerfile) has been modified to only contain the Node, Python requirements, and to support ARM64 processors.
+**Note**
+This will only result with new Notice file generation in case any of the `package.json` for NPM, `Pipfile` and `requirements.txt` for Python projects has been modified. While the files are untouched the license is considered up to date.
 
 ### Configuration options
 We have listed a set of example licenses which are in general prohibited if you plan to deploy anything to production systems and keep the code private. You can change these licenses anytime by updating the ```licensecheck.json``` file.
@@ -254,6 +253,7 @@ Example configuration:
         "excludedSubProjects": ["./example/package.json"]
     },
     "python": {
+        "allowedTypes": ["Pipenv"],
         "excluded": [],
         "excludedSubProjects": ["./example/Pipfile"]
     }
@@ -264,7 +264,8 @@ Example configuration:
 * Sub folder which `Pipfile` or `package.json` file should not be included into the License check should be listen under the `npm.excludedSubProjects` or `python.excludedSubProjects` attributes.
 * For NPM packages the subfolder also needs to contain a package-lock.json file to ensure the right dependencies will be installed and checked.
 * Dependencies can be excluded from the license verification for NPM and Python as well.
-
+* Python has many package management solution. The Vanilla Pipeline supports `Pipenv` and the regular `requirements.txt`
+ files. With the ```licensecheck.json``` file `python.allowedTypes` allows to configure which packageManager package types considered. The values are `Pipenv`, and the `requirements.txt`. 
 
 ## Appendix
 
@@ -329,7 +330,7 @@ git push -u origin ### Push changes to remote
 ### Working with Python dependencies
 The project utilizes the [Pipenv](https://pipenv.pypa.io/en/latest/). Pipenv automatically creates and manages a virtualenv for your project, as well as adds/removes packages from your `Pipfile` as you install/uninstall packages. It also generates a project `Pipfile.lock`, which is used to produce deterministic builds.
 
-The Python dependencies are maintained in `Pipfile` instead of the `requirements.txt` file and requirements.txt files should not be commited to git.
+The Python dependencies should be maintained in `Pipfile` instead of the `requirements.txt` file and requirements.txt files usage should be avoided.
 
 #### How to install Pipenv
 The recommended approach is to use `pip install pipenv -U` command. More information can be found [here](https://pipenv.pypa.io/en/latest/installation/#installing-pipenv). 
@@ -440,7 +441,7 @@ be consistent across those files.
 - If you have already deployed RES/DEV/INT and want to disable INT then please do the following:
   ```bash
   export ACCOUNT_INT="-"
-  cdk deploy --all --region ${AWS_REGION} --profile $RES_ACCOUNT_AWS_PROFILE --qualifier ${CDK_QUALIFIER}
+  npm run cdk deploy -- --all --region ${AWS_REGION} --profile $RES_ACCOUNT_AWS_PROFILE --qualifier ${CDK_QUALIFIER}
   ```
   After performing this please do not forget to delete your CloudFormation resources on the previous INT Account.
 - `validation error detected: Value 'log-retention-..........-.......-...-DEV' at 'roleName' failed to satisfy constraint: Member must have length less than or equal to 64`: This usually happens if you use longer `applicationName` in the `config/AppConfig.ts` than 20 characters. In this case, you either use different application name or modify the log retention role in the [LogRetentionRoleStack](lib/stacks/core/LogRetentionRoleStack.ts).
@@ -466,7 +467,7 @@ be consistent across those files.
 * `npm run license:macos`               validate the NOTICE file on MacOS systems
 * `npm run lint`                        check for linting issues in the project
 * `npm run lint:fix`                    fix linting issues in the project (do not forget to add & commit the fixed files)
-* `npm run cdk deploy`                  deploy this stack to your default AWS account/region
+* `npm run cdk deploy -- --all`         deploy all stacks to your configured AWS account/region
 * `npm run cdk diff`                    compare deployed stack with current state
 * `npm run cdk synth -- --all`          emits the synthesized CloudFormation template for all stacks
 

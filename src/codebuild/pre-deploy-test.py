@@ -4,9 +4,10 @@ SPDX-License-Identifier: MIT-0
 """
 
 """
-This is the python code triggered in the cdk pipeline post deployment.
-The script can be modified to execute pre-deploy tests which would be, e.g: Integration/Unit Testing of your code
-This env var is defined in the `lib/pipeline-stack.ts`
+This is the python code triggered in the cdk pipeline pre deployment.
+For describing all the log groups in the target account and add log log_groups definition.
+The scripts assumes a role that is created in the `lib/test-role.ts` and the role name is passed as env var;
+This env var is defined in the `lib/cdk-pipeline/core/PreDeployBuildStep.ts`
 """
 import logging
 import os
