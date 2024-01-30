@@ -6,12 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Released]
 
-## [1.1.4] - 2024-01-25
+## [1.1.4] - 2024-01-30
 
 In this release we have included bugfixes and also refactored the License checking. To cleanup the non-used docker image for the license checker, please run the following command `docker rmi aws/codebuild/standard:7.0` and then re-run `npm run audit:fix:license` and follow the steps in the README.md.
 
 ### Added
-- Allowed modifying the location of the synthesized stacks with the `primaryOutputDirectory` attribute. This allows the VP to be placed into a subdirectory in a repository. That results in a cleaner directory structure where the root directory can focus on the business problem, while the CICD Boot will be present only as a sidecar and enable the CI/CD process.
+- Allowed modifying the location of the synthesized stacks with the `primaryOutputDirectory` attribute. This allows the CICD Boot to be placed into a subdirectory in a repository. That results in a cleaner directory structure where the root directory can focus on the business problem, while the CICD Boot will be present only as a sidecar and enable the CI/CD process.
 ### Changed
 - Removed outdated S3 Resource Policy enforcements (`DenyUnEncryptedObjectUploads`) from bin/aspects.ts. This is handled from Amazon S3, [here](https://docs.aws.amazon.com/AmazonS3/latest/userguide/default-encryption-faq.html) the official documentation (all new objects are automatically encrypted by default).
 - Removed `fix_log_groups` from src/codebuild/post-deploy-fixes.py as this is only Porsche EPO specific and doesn't apply to all the other EPOs.
@@ -19,6 +19,7 @@ In this release we have included bugfixes and also refactored the License checki
 - License checking is no longer depending on Docker images, the licenses are generated based on the environment the script is executed. It is recommended to generate the NOTICE file on an environment that is close to the desired target environment in case you are looking for the precise results. **Note**: List of dependencies can be different based on OS and CPU architecture types.
 - License checking supports `requirements.txt` files from now as well. It is recommended to be as specific as possible with your dependency versions. Overall the recommendation is to use `Pipenv` over the `requirements.txt`.
 - Scripts have been modified to assume that the `PROJECT_ROOT` is the `CWD` directory instead of the parent folder of the `scripts` folder. This allows the VP to be placed into a subfolder in a repository.
+- Updated the 3rd party NPM libraries version
 ### Fixed
 - Issue with python dependency check script on multi lambda layers structure
 - Issue with the license checker in using amd64 platform
