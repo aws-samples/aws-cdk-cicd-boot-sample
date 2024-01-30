@@ -9,7 +9,7 @@
     "build": "tsc && tsc --build --clean && npm run lint",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "npx aws-cdk@2.114.1",
+    "cdk": "npx aws-cdk@2.124.0",
     "validate": "npx ts-node ./scripts/package-checksum-validator.ts",
     "validate:fix": "ts-node ./scripts/package-checksum-generator.ts",
     "audit": "concurrently 'npm:audit:*(!fix)'",
