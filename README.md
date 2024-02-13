@@ -103,7 +103,7 @@ Amazon S3 server access logging is a security best practice and should be always
 
 Make sure that the destination bucket has policy granting `s3:PutObject` permissions to the logging service principal `logging.s3.amazonaws.com` ([see documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/enable-server-access-logging.html)).
 
-If you do not have compliance log buckets, then the Vanilla Pipeline will automatically create them outside of the scope of your current project. The S3 Buckets will be named as configured in the AppConfig.ts
+If you do not have compliance log buckets, then the CICD Boot will automatically create them outside of the scope of your current project. The S3 Buckets will be named as configured in the AppConfig.ts
 
 ### Bootstrap stages
 
