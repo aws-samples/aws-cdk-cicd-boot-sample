@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Released]
 
+## [1.2.0] - 2024-02-13
+
+In this release we have automated the process of creating S3 Compliance Buckets. We have also done minor refactoring to the way how we track the CDK code for security findings using CDK NAG Tool as well as resolved a minor CVE finding. Please refer to the README and perform a manual deployment to have the `ComplianceLogBucketStack` deployed into your RES account.
+
+### Added
+### Changed
+- Swapped the manual creation of compliance log buckets from bash (`create_compliance_log_bucket`) to using CDK Stack: `ComplianceLogBucketStack`.
+- Removed stack level CDK NAG suppressions where applicable.
+- Updated CDK version to 2.127.0
+- Updated 3rd party NPM libraries version
+### Fixed
+- Addressed CVE-2023-50782 in the Common Lambda Layer code: `src/lambda-layer/common/Pipfile`
+- Fixed exit code in the `audit:deps:python` when having vulnerability findings
+
 ## [1.1.4] - 2024-01-30
 
 In this release we have included bugfixes, 3rd party dependency updates and also refactored the License checking. To cleanup the non-used docker image for the license checker, please run the following command `docker rmi aws/codebuild/standard:7.0` and then re-run `npm run audit:fix:license` and follow the steps in the README.md.

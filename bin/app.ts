@@ -10,8 +10,8 @@ import { SecurityControls } from './aspects';
 import { AppConfig } from '../config/AppConfig';
 import { STAGE } from '../config/Types';
 import { PipelineStack } from '../lib/cdk-pipeline/core/PipelineStack';
+import { ComplianceLogBucketStack } from '../lib/stacks/core/ComplianceLogBucketStack';
 import { EncryptionStack } from '../lib/stacks/core/EncryptionStack';
-
 import { RepositoryStack } from '../lib/stacks/core/RepositoryStack';
 import { SSMParameterStack } from '../lib/stacks/core/SSMParameterStack';
 import { VPCStack } from '../lib/stacks/core/VPCStack';
@@ -24,6 +24,10 @@ const repositoryStack = new RepositoryStack(app, `${AppConfig.applicationName}Re
   applicationName: AppConfig.applicationName,
   applicationQualifier: AppConfig.applicationQualifier,
   repositoryConfig: AppConfig.repositoryConfig,
+});
+
+new ComplianceLogBucketStack(app, `${AppConfig.applicationName}ComplianceLogBucketStack`, {
+  complianceLogBucketName: AppConfig.complianceLogBucketName.RES,
 });
 
 new SSMParameterStack(app, `${AppConfig.applicationName}SSMParameterStack`, {

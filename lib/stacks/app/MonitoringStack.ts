@@ -75,18 +75,5 @@ export class MonitoringStack extends cdk.Stack {
       description: 'The name of the monitoring topic',
       exportName: `${props.applicationName}-${props.stageName}-monitoringTopicName`,
     });
-
-    NagSuppressions.addStackSuppressions(this, [{
-      id: 'AwsSolutions-IAM4',
-      reason: 'Reviewed wildcards by CDK Monitoring Constructs',
-    },
-    {
-      id: 'AwsSolutions-L1',
-      reason: 'Reviewed deprecated Lambdas for CDK Monitoring Constructs',
-    },
-    {
-      id: 'AwsSolutions-IAM5',
-      reason: 'Reviewed Lambda Service role for CDK Monitoring Constructs',
-    }]);
   }
 }

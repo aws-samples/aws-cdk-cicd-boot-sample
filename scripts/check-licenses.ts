@@ -16,7 +16,7 @@ const PYTHON_LICENSE_CHECKER_TOOL = 'pip-licenses';
 
 // 5 min timeout
 const GLOBAL_TIMEOUT = { timeout: 5 * 60 * 1000 };
-const DEFAULT_EXCLUDED_FOLDERS = ['node_modules/**', 'cdk.out/**', '.git/**', 'dist/**', 'docs/**', 'bin/**', 'tmp/**'];
+const DEFAULT_EXCLUDED_FOLDERS = ['**/node_modules/**', '**/cdk.out/**', '.git/**', '**/dist/**', 'docs/**', '**/bin/**', '**/tmp/**'];
 
 interface ScanningContext {
   readonly projectRoot: string;
