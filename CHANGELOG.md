@@ -18,7 +18,7 @@ In this release we have automated the process of creating S3 Compliance Buckets.
 - Updated 3rd party NPM libraries version
 ### Fixed
 - Addressed CVE-2023-50782 in the Common Lambda Layer code: `src/lambda-layer/common/Pipfile`
-- Running npm run audit:deps:python the script is returning with 1 error code, in case there are any vulnerabilities
+- Fixed exit code in the `audit:deps:python` when having vulnerability findings
 
 ## [1.1.4] - 2024-01-30
 
