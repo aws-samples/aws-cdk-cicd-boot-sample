@@ -103,27 +103,5 @@ export class PipelineStack extends cdk.Stack {
     });
 
     pipeline.buildPipeline();
-    NagSuppressions.addStackSuppressions(this, [{
-      id: 'AwsSolutions-CB3',
-      reason: 'Suppress AwsSolutions-CB3 - Privileged mode is required to build Lambda functions written in JS/TS',
-    },
-    {
-      id: 'AwsSolutions-IAM5',
-      reason: 'Suppress AwsSolutions-IAM5 on the known Action wildcards.',
-      appliesTo: [
-        {
-          regex: '/(.*)(Action::kms:ReEncrypt|Action::s3:Abort|Action::s3:GetObject|Action::s3:DeleteObject|Action::s3:List|Action::s3:GetBucket|Action::kms:GenerateDataKey(.*)|Action::ec2messages:GetEndpoint|Action::ec2messages(.*)|Action::ssmmessages(.*)|Action::ssmmessages:OpenDataChannel)(.*)$/g',
-        },
-      ],
-    },
-    {
-      id: 'AwsSolutions-IAM5',
-      reason: 'Suppress AwsSolutions-IAM5 on the Resource wildcards.',
-      appliesTo: [
-        {
-          regex: '/^Resource::(.*)/g',
-        },
-      ],
-    }]);
   }
 }

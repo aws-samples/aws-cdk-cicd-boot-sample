@@ -6,6 +6,7 @@ import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as pipelines from 'aws-cdk-lib/pipelines';
+import { NagSuppressions } from 'cdk-nag';
 import { Construct, IConstruct } from 'constructs';
 import { CodeGuruSecurityStep, CodeGuruSeverityThreshold } from './constructs/CodeGuruSecurityStepConstruct';
 
@@ -69,6 +70,7 @@ export class CDKPipeline extends pipelines.CodePipeline {
     super(scope, id, {
       pipelineName: props.pipelineName,
       crossAccountKeys: true,
+      enableKeyRotation: true,
       dockerEnabledForSynth: props.isDockerEnabledForSynth,
       synth: new pipelines.ShellStep('Synth', {
         input: props.repositoryInput,
@@ -150,6 +152,35 @@ export class CDKPipeline extends pipelines.CodePipeline {
     if (this.codeGuruScanThreshold) {
       this.applyCodeGuruScan(this.codeGuruScanThreshold);
     }
+
+    NagSuppressions.addResourceSuppressions(this.synthProject, [
+      {
+        id: 'AwsSolutions-CB3',
+        reason: 'Suppress AwsSolutions-CB3 - Privileged mode is required to build Lambda functions written in JS/TS',
+      },
+    ], true);
+
+    NagSuppressions.addResourceSuppressions(this, [
+      {
+        id: 'AwsSolutions-IAM5',
+        reason: 'Suppress AwsSolutions-IAM5 on the Resource wildcards.',
+        appliesTo: [
+          {
+            regex: '/^Resource::(.*)/g',
+          },
+        ],
+      },
+      {
+        id: 'AwsSolutions-IAM5',
+        reason: 'Suppress AwsSolutions-IAM5 on the known Action wildcards.',
+        appliesTo: [
+          {
+            regex:
+              '/(.*)(Action::kms:ReEncrypt|Action::s3:Abort|Action::s3:GetObject|Action::s3:DeleteObject|Action::s3:List|Action::s3:GetBucket|Action::kms:GenerateDataKey(.*)|Action::ec2messages:GetEndpoint|Action::ec2messages(.*)|Action::ssmmessages(.*)|Action::ssmmessages:OpenDataChannel)(.*)$/g',
+          },
+        ],
+      },
+    ], true);
   }
 
   private applyCodeGuruScan(threshold: CodeGuruSeverityThreshold) {

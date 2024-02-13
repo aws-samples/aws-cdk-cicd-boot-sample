@@ -6,20 +6,20 @@ This repository contains the infrastructure as code to bootstrap your next CI/CD
 ├── config
 ├── docs
 ├── lib
-│   ├── cdk-pipeline
-│   │   ├── app ### here you need to initialize the cdk-stacks you add in the lib/stacks/app
-│   │   └── core ### avoid doing changes here in order to keep the update path
-│   └── stacks
-│       ├── app ### here you define new CDK Stacks which you want to deploy
-│       └── core ### avoid doing changes here in order to keep the update path
+│   ├── cdk-pipeline
+│   │   ├── app ### here you need to initialize the cdk-stacks you add in the lib/stacks/app
+│   │   └── core ### avoid doing changes here in order to keep the update path
+│   └── stacks
+│       ├── app ### here you define new CDK Stacks which you want to deploy
+│       └── core ### avoid doing changes here in order to keep the update path
 ├── scripts
-│   └── tests ### extend and add new
+│   └── tests ### extend and add new
 ├── src
-│   ├── codebuild
-│   ├── lambda-functions
-│   │   └── test ### extend and add new functions as you see fit
-│   └── lambda-layer
-│       └── common ### add more packages to requirements.txt
+│   ├── codebuild
+│   ├── lambda-functions
+│   │   └── test ### extend and add new functions as you see fit
+│   └── lambda-layer
+│       └── common ### add more packages to requirements.txt
 ├── test
 └── utils
 ```
@@ -101,32 +101,9 @@ npm ci ### it installs the frozen dependencies from package-lock.json
 ### Required
 Amazon S3 server access logging is a security best practice and should be always enabled. The compliancy logs configuration gets applied to S3 buckets in the bin/aspects.ts for each stage RES/DEV/INT.
 
-If you already have existing buckets for compliance logs then set their names in `complianceLogBucketName` property in the [AppConfig](./config/AppConfig.ts).  
 Make sure that the destination bucket has policy granting `s3:PutObject` permissions to the logging service principal `logging.s3.amazonaws.com` ([see documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/enable-server-access-logging.html)).
 
-If you do not have buckets, then manually create them `compliance-log-${(ACCOUNT_RES|ACCOUNT_DEV|ACCOUNT_INT))}-${AWS_REGION}` and add corresponding bucket
-policies using the commands below.
-
-```bash
-function create_compliance_log_bucket {
-    local profile=$1
-    local account=$2
-    local region=$3
-
-    local bucket_name="compliance-log-${account}-${region}"
-    local policy=$(jq ".Statement[].Resource=\"arn:aws:s3:::$bucket_name/*\"" ./scripts/compliance-bucket-policy.json | tr '\n' ' ')
-
-    aws --profile $profile s3api create-bucket --bucket $bucket_name --create-bucket-configuration LocationConstraint=${region}
-    aws --profile $profile s3api put-bucket-policy --bucket $bucket_name --policy """$policy"""
-    aws --profile $profile s3api put-public-access-block --bucket $bucket_name --public-access-block-configuration "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
-}
-
-create_compliance_log_bucket $RES_ACCOUNT_AWS_PROFILE $ACCOUNT_RES $AWS_REGION
-
-create_compliance_log_bucket $DEV_ACCOUNT_AWS_PROFILE $ACCOUNT_DEV $AWS_REGION
-
-create_compliance_log_bucket $INT_ACCOUNT_AWS_PROFILE $ACCOUNT_INT $AWS_REGION
-```
+If you do not have compliance log buckets, then the Vanilla Pipeline will automatically create them outside of the scope of your current project. The S3 Buckets will be named as configured in the AppConfig.ts
 
 ### Bootstrap stages
 

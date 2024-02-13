@@ -10,6 +10,7 @@ import { NagUtils } from '../../../utils/suppressions';
 import { LambdaStack } from '../../stacks/app/LambdaStack';
 import { MonitoringStack } from '../../stacks/app/MonitoringStack';
 import { S3BucketStack } from '../../stacks/app/S3BucketStack';
+import { ComplianceLogBucketStack } from '../../stacks/core/ComplianceLogBucketStack';
 import { EncryptionStack } from '../../stacks/core/EncryptionStack';
 import { LogRetentionRoleStack } from '../../stacks/core/LogRetentionRoleStack';
 
@@ -30,6 +31,10 @@ export class AppStage extends cdk.Stage {
     const encryptionStack = new EncryptionStack(this, `${props.applicationName}EncryptionStack`, {
       applicationName: props.applicationName,
       stageName: props.stage,
+    });
+
+    new ComplianceLogBucketStack(this, `${props.applicationName}ComplianceLogBucketStack`, {
+      complianceLogBucketName: props.complianceLogBucketName,
     });
 
     new LogRetentionRoleStack(this, `${props.applicationName}LogRetentionRoleStack`, {
