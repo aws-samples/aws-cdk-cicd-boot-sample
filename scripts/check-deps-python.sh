@@ -50,6 +50,6 @@ fi
 for pythonModule in "${REQUIREMENTS[@]}"; do
     pythonModuleFolder=`dirname $pythonModule`;
     pushd "${pythonModuleFolder}" || exit 1;
-    pipenv requirements --exclude-markers --hash > requirements.txt && pip-audit -r requirements.txt --disable-pip && rm -rf requirements.txt;
+    pipenv requirements --exclude-markers --hash > requirements.txt && pip-audit -r requirements.txt --disable-pip && rm -rf requirements.txt || exit 1;
     popd || exit 1;
 done
