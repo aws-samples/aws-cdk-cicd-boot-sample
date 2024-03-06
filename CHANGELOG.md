@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Released]
 
-## [1.2.1] - 2024-03-05
+## [1.2.1] - 2024-03-06
 
 In this release we introduced the ability to customize and extend the list of available deployment stages. On top of the existing stages, you are allowed to define other stages differently from each other to support use cases where stages are not unified. We have also enabled AWS SSM ParameterStore to lookup for VPC ids stored there instead of passing them as plain text. Various bugfixes were also applied. **Please make sure to manually deploy the PipelineStack in your RES account as the CodeBuild Synth phase shell was changed from `sh` to `bash`, you can always refer to the instructions present in the README.md on how to run the ```cdk deploy``` command locally.**
 
