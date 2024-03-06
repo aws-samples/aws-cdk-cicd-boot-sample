@@ -44,9 +44,6 @@ export class SecurityControls implements IAspect {
     } else if (node instanceof CfnSubnet) {
       node.mapPublicIpOnLaunch = false;
     } else if (node instanceof Bucket) {
-      if (this.stage !== STAGE.PROD) {
-        node.applyRemovalPolicy(RemovalPolicy.DESTROY);
-      }
       node.addToResourcePolicy(
         new PolicyStatement({
           sid: 'DenyHTTP',

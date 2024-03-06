@@ -5,6 +5,10 @@ export_vars.sh
 *.d.ts
 dist
 node_modules
+.vscode
+
+# ignore local NPM configuration file
+.npmrc
 
 .idea/
 

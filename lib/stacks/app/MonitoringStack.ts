@@ -6,7 +6,6 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as kms from 'aws-cdk-lib/aws-kms';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import { MonitoringFacade, SnsAlarmActionStrategy, DefaultDashboardFactory, DashboardRenderingPreference, MonitoringNamingStrategy } from 'cdk-monitoring-constructs';
-import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
 
 interface Props extends cdk.StackProps {

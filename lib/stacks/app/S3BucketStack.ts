@@ -9,7 +9,7 @@ import { S3Bucket } from '../../cdk-pipeline/core/S3Bucket';
 
 interface Props extends cdk.StackProps {
   bucketName: string;
-  stageName: STAGE;
+  stageName: string;
   applicationQualifier: string;
   encryptionKey: kms.IKey;
 }

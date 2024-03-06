@@ -4,29 +4,53 @@
 import * as cdk from 'aws-cdk-lib';
 import * as codecommit from 'aws-cdk-lib/aws-codecommit';
 import * as iam from 'aws-cdk-lib/aws-iam';
-import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
 import { CDKPipeline, PipelineProps } from './CDKPipeline';
-import { PostDeployBuildStep } from './PostDeployBuildStep';
-import { PreDeployBuildStep } from './PreDeployBuildStep';
-import { DeploymentStage, STAGE } from '../../../config/Types';
+import { DefaultAppStageProvider } from './providers/DefaultAppStageProvider';
+import { RequiredRESStage, STAGE } from '../../../config/Types';
 import { SSMParameterStack } from '../../stacks/core/SSMParameterStack';
-import { AppStage } from '../app/AppStage';
 
 export interface RepositoryProps extends codecommit.RepositoryProps {
   readonly connectionArn: string;
 }
 
+export interface DeploymentProviderProps {
+  env: Environment;
+  scope: Construct;
+  applicationName: string;
+  applicationQualifier: string;
+  logRetentionInDays: string;
+  resAccount: string;
+  stage: string;
+  complianceLogBucketName: string;
+}
+
+export interface Deployment {
+  readonly stage: cdk.Stage;
+  readonly preDeploySteps?: cdk.pipelines.Step[];
+  readonly postDeploySteps?: cdk.pipelines.Step[];
+}
+
+export interface IStageProvider {
+
+  provide: (props: DeploymentProviderProps) => Deployment;
+
+}
+
+export type IDeploymentStage = Environment & Partial<IStageProvider>;
+export type IDeploymentSTAGE = RequiredRESStage<IDeploymentStage>;
+
+
 interface Props extends cdk.StackProps {
   applicationName: string;
   applicationQualifier: string;
   logRetentionInDays: string;
-  deployments: {[key in DeploymentStage]: Environment};
+  deployments: IDeploymentSTAGE;
   pipelineProps: PipelineProps;
-  complianceLogBucketName: {[key in DeploymentStage]: string};
+  complianceLogBucketName: RequiredRESStage<string>;
 }
 
-interface Environment {
+export interface Environment {
   account: string;
   region: string;
 }
@@ -52,56 +76,65 @@ export class PipelineStack extends cdk.Stack {
       ],
     });
 
-    Object.entries(props.deployments).forEach(([deploymentStage, deploymentEnvironment]) => {
-      if (deploymentStage == STAGE.RES) return;
-      if (deploymentEnvironment.account == '-') return;
-      const logRetentionRoleArn = AppStage.getLogRetentionRoleArn(
-        deploymentEnvironment.account,
-        deploymentEnvironment.region,
-        deploymentStage as STAGE,
-        props.applicationName,
-      );
+    const resAccount = props.deployments.RES!.account;
 
-      const preDeployStep = new PreDeployBuildStep(deploymentStage as STAGE, {
-        env: {
-          TARGET_REGION: deploymentEnvironment.region,
-        },
-      });
+    Object.entries(props.deployments).forEach(([deploymentStage, deploymentConfig]) => {
 
-      pipeline.addStage(new AppStage(this, deploymentStage, {
-        env: deploymentEnvironment,
-        resAccount: props.deployments.RES.account,
+      if (deploymentStage === 'RES' && !deploymentConfig.provide) {
+        // There are no additional resources for the RES stage, so we don't need to create a stage.
+        this.createAccountSSMParam(props.applicationQualifier, deploymentStage, deploymentConfig);
+        return;
+      }
+
+      // Backward compatibility
+      if ('-' === deploymentConfig.account) {
+        // The account is not specified, so we don't need to create a stage.
+        this.createAccountSSMParam(props.applicationQualifier, deploymentStage, deploymentConfig);
+        return;
+      }
+
+      const provider: IStageProvider = deploymentConfig.provide
+        ? deploymentConfig as IStageProvider
+        : new DefaultAppStageProvider(deploymentConfig as Environment, deploymentStage !== 'DEV');
+
+      const stageDeployment = provider.provide({
+        env: deploymentConfig,
+        scope: this,
         applicationName: props.applicationName,
         applicationQualifier: props.applicationQualifier,
         logRetentionInDays: props.logRetentionInDays,
-        stage: deploymentStage as STAGE,
-        complianceLogBucketName: props.complianceLogBucketName[deploymentStage as DeploymentStage],
-      }), {
-        pre: [
-          preDeployStep,
-          // add manual approval step for all stages, except DEV
-          ...(deploymentStage != STAGE.DEV ?
-            [
-              preDeployStep.appendManualApprovalStep(),
-            ]
-            : []
-          ),
-        ],
-        post: [
-          new PostDeployBuildStep(deploymentStage as STAGE, {
-            env: {
-              ACCOUNT_ID: deploymentEnvironment.account,
-              TARGET_REGION: deploymentEnvironment.region,
-            },
-          },
-          props.applicationName,
-          props.logRetentionInDays,
-          logRetentionRoleArn,
-          ),
-        ],
+        resAccount: resAccount,
+        stage: deploymentStage,
+        complianceLogBucketName: props.complianceLogBucketName[deploymentStage],
       });
+      pipeline.addStage(stageDeployment.stage, {
+        pre: stageDeployment.preDeploySteps,
+        post: stageDeployment.postDeploySteps,
+      });
+
+      this.createAccountSSMParam(props.applicationQualifier, deploymentStage, deploymentConfig);
     });
 
     pipeline.buildPipeline();
+  }
+
+  private createAccountSSMParam(applicationQualifier: string, deploymentStage: STAGE, env: Environment) {
+    switch (deploymentStage) {
+      case STAGE.RES:
+        SSMParameterStack.createParameterInSSMParameterStack(applicationQualifier, 'AccountRes', env.account);
+        break;
+      case STAGE.DEV:
+        SSMParameterStack.createParameterInSSMParameterStack(applicationQualifier, 'AccountDev', env.account);
+        break;
+      case STAGE.INT:
+        SSMParameterStack.createParameterInSSMParameterStack(applicationQualifier, 'AccountInt', env.account);
+        break;
+      case STAGE.PROD:
+        SSMParameterStack.createParameterInSSMParameterStack(applicationQualifier, 'AccountProd', env.account);
+        break;
+      default:
+        SSMParameterStack.createParameterInSSMParameterStack(applicationQualifier, `Account${deploymentStage}`, env.account);
+        break;
+    }
   }
 }

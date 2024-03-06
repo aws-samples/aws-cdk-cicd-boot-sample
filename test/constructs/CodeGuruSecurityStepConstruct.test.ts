@@ -11,6 +11,7 @@ describe('codeguru-step-construct', () => {
   const stack = new cdk.Stack();
 
   new CodeGuruSecurityStepConstruct(stack, 'CodeGuruReviewStep', {
+    applicationName: TestAppConfig.applicationName,
     applicationQualifier: TestAppConfig.applicationQualifier,
     sourceOutput: new codepipeline.Artifact(),
     threshold: CodeGuruSeverityThreshold.HIGH,

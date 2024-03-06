@@ -4,11 +4,10 @@
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as pipelines from 'aws-cdk-lib/pipelines';
 import { CDKPipeline } from './CDKPipeline';
-import { STAGE } from '../../../config/Types';
 
 export class PostDeployBuildStep extends pipelines.CodeBuildStep {
 
-  constructor(stage: STAGE, props: Omit<pipelines.CodeBuildStepProps, 'commands'>, applicationName: string, logRetentionInDays: string, logRetentionRoleArn: string) {
+  constructor(stage: string, props: Omit<pipelines.CodeBuildStepProps, 'commands'>, applicationName: string, logRetentionInDays: string, logRetentionRoleArn: string) {
     super(`PostDeploy${stage}`, {
       ...props,
       env: {

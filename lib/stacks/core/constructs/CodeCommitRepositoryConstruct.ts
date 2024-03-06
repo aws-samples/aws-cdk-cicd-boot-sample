@@ -100,29 +100,36 @@ export class CodeCommitRepositoryConstruct extends Construct {
       new CodeCommitRepositoryAspects(),
     );
 
-    nag.NagSuppressions.addResourceSuppressions(this, [
-      {
-        id: 'AwsSolutions-L1',
-        reason: 'Suppress AwsSolutions-L1 - Outdated Lambda for PullRequestChecker',
-      },
-      {
-        id: 'AwsSolutions-CB4',
-        reason: 'Encryption not needed for CodeBuild pull request verification',
-      },
-      {
-        id: 'AwsSolutions-CB3',
-        reason: 'Suppress AwsSolutions-CB3 - Privileged mode is required to build Lambda functions written in JS/TS',
-      },
-      {
-        id: 'AwsSolutions-IAM5',
-        reason: 'Suppress AwsSolutions-IAM5 on the Resource wildcards.',
-        appliesTo: [
-          {
-            regex: '/^Resource::(.*)/g',
-          },
-        ],
-      },
-    ], true);
+    nag.NagSuppressions.addResourceSuppressions(
+      this,
+      [
+        {
+          id: 'AwsSolutions-L1',
+          reason: 'Suppress AwsSolutions-L1 - Outdated Lambda for PullRequestChecker',
+        },
+        {
+          id: 'AwsSolutions-CB4',
+          reason: 'Encryption not needed for CodeBuild pull request verification',
+        },
+        {
+          id: 'AwsSolutions-CB3',
+          reason: 'Suppress AwsSolutions-CB3 - Privileged mode is required to build Lambda functions written in JS/TS',
+        },
+      ],
+      true,
+    );
+
+    nag.NagSuppressions.addResourceSuppressionsByPath(
+      cdk.Stack.of(this),
+      `${cdk.Stack.of(this).stackName}/CodeCommit/PullRequestCheck`,
+      [
+        {
+          id: 'AwsSolutions-IAM5',
+          reason: 'Suppress AwsSolutions-IAM5 on the PR check lambda function Resource.',
+        },
+      ],
+      true,
+    );
   }
 }
 function suppressDeprecationWarning(block: () => void) {

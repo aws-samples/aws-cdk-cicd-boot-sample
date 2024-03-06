@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
+import * as cdk from 'aws-cdk-lib';
 import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import { IVpcConfig } from './VpcConfig';
 import { CodeGuruSeverityThreshold } from '../lib/cdk-pipeline/core/constructs/CodeGuruSecurityStepConstruct';
@@ -11,12 +12,19 @@ export interface ICodeBuildEnvSettings {
   synthOutputDirectory: string;
 }
 
-export type DeploymentStage = Exclude<STAGE, 'PROD'>; // remove Exclude statement to add PROD stage to deployments
+type IStage = 'RES' | 'DEV' | 'INT' | 'PROD' | string;
+
+export type DeploymentStage = Exclude<IStage, 'PROD'>; // remove Exclude statement to add PROD stage to deployments
+
+export type Environment = Required<cdk.Environment>;
+
+export type AllStage<T> = { [key in IStage]: T };
+export type RequiredRESStage<T> = AllStage<T> & { 'RES': T };
 
 export interface IAppConfig {
   applicationName: string;
   applicationQualifier: string;
-  deploymentAccounts: {[key in DeploymentStage]: string};
+  deploymentAccounts: RequiredRESStage<string>;
   region: string;
   logRetentionInDays: string;
   codeBuildEnvSettings: ICodeBuildEnvSettings;
@@ -28,15 +36,19 @@ export interface IAppConfig {
     proxyTestUrl: string;
   };
   repositoryConfig: IRepositoryConfig;
-  complianceLogBucketName: {[key in DeploymentStage]: string};
+  complianceLogBucketName: RequiredRESStage<string>;
 }
 
-export enum STAGE {
-  RES = 'RES',
-  DEV = 'DEV',
-  INT = 'INT',
-  PROD = 'PROD'
-}
+export class STAGE {
+
+  public static readonly RES = 'RES';
+
+  public static readonly DEV = 'DEV';
+
+  public static readonly INT = 'INT';
+
+  public static readonly PROD = 'PROD';
+};
 
 export type RepositoryType = 'GITHUB' | 'CODECOMMIT'
 

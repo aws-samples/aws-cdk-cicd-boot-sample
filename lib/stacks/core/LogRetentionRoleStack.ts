@@ -3,6 +3,7 @@
 
 import * as cdk from 'aws-cdk-lib';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as kms from 'aws-cdk-lib/aws-kms';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
 import { STAGE } from '../../../config/Types';
@@ -11,6 +12,7 @@ interface Props extends cdk.StackProps {
   resAccount: string;
   stageName: STAGE;
   applicationName: string;
+  encryptionKey: kms.IKey;
 }
 
 export class LogRetentionRoleStack extends cdk.Stack {
@@ -34,18 +36,16 @@ export class LogRetentionRoleStack extends cdk.Stack {
                 'logs:GetLogEvents',
                 'logs:AssociateKmsKey',
                 'logs:Describe*',
-                'kms:Encrypt',
-                'kms:Decrypt',
-                'kms:ReEncrypt',
-                'kms:GenerateDataKey',
-                'kms:DescribeKey',
                 'cloudformation:Get*',
                 'cloudformation:Describe*',
                 'cloudformation:List*',
               ],
-              resources: [
-                '*',
-              ],
+              resources: ['*'],
+            }),
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: ['kms:Encrypt', 'kms:Decrypt', 'kms:ReEncrypt', 'kms:GenerateDataKey', 'kms:DescribeKey'],
+              resources: [props.encryptionKey.keyArn],
             }),
           ],
         }),

@@ -34,9 +34,6 @@ new SSMParameterStack(app, `${AppConfig.applicationName}SSMParameterStack`, {
   env: { account: AppConfig.deploymentAccounts.RES, region: AppConfig.region },
   applicationQualifier: AppConfig.applicationQualifier,
   parameter: {
-    AccountRes: AppConfig.deploymentAccounts.RES,
-    AccountDev: AppConfig.deploymentAccounts.DEV,
-    AccountInt: AppConfig.deploymentAccounts.INT,
   },
 });
 
