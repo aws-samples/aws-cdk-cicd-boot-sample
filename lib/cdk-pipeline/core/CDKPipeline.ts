@@ -8,6 +8,7 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as pipelines from 'aws-cdk-lib/pipelines';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct, IConstruct } from 'constructs';
+import * as _ from 'lodash';
 import { CodeGuruSecurityStep, CodeGuruSeverityThreshold } from './constructs/CodeGuruSecurityStepConstruct';
 
 interface Props extends PipelineProps {
@@ -65,6 +66,7 @@ export class CDKPipeline extends pipelines.CodePipeline {
 
   private readonly codeGuruScanThreshold?: CodeGuruSeverityThreshold;
   private readonly applicationQualifier: string;
+  private readonly pipelineName: string;
 
   constructor(scope: Construct, id: string, props: Props) {
     super(scope, id, {
@@ -85,6 +87,7 @@ export class CDKPipeline extends pipelines.CodePipeline {
       }),
       codeBuildDefaults: {
         ...CDKPipeline.generateVPCCodeBuildDefaults(scope, props.vpcProps),
+        partialBuildSpec: CDKPipeline.getPartialBuildSpec(props.vpcProps),
         buildEnvironment: {
           buildImage: props.buildImage,
         },
@@ -94,55 +97,62 @@ export class CDKPipeline extends pipelines.CodePipeline {
 
     this.codeGuruScanThreshold = props.codeGuruScanThreshold;
     this.applicationQualifier = props.applicationQualifier;
+    this.pipelineName = props.pipelineName;
 
     if (!props.vpcProps) {cdk.Aspects.of(this).add(new CodeBuildAspect());}
+  }
+
+  static getDefaultPartialBuildSpec() {
+    return {
+      version: '0.2',
+      env: {
+        shell: 'bash',
+      },
+    };
+  }
+
+  static getPartialBuildSpec(vpcProps?: VpcProps) {
+    const buildSpec = CDKPipeline.getDefaultPartialBuildSpec();
+
+    if (vpcProps?.proxy?.proxySecretArn) {
+      // deep merge with
+      _.merge(buildSpec, {
+        env: {
+          'variables': {
+            NO_PROXY: vpcProps.proxy.noProxy.join(', '),
+            AWS_STS_REGIONAL_ENDPOINTS: 'regional',
+          },
+          'secrets-manager': {
+            PROXY_USERNAME: vpcProps.proxy.proxySecretArn.concat(':username'),
+            PROXY_PASSWORD: vpcProps.proxy.proxySecretArn.concat(':password'),
+            HTTP_PROXY_PORT: vpcProps.proxy.proxySecretArn.concat(':http_proxy_port'),
+            HTTPS_PROXY_PORT: vpcProps.proxy.proxySecretArn.concat(':https_proxy_port'),
+            PROXY_DOMAIN: vpcProps.proxy.proxySecretArn.concat(':proxy_domain'),
+          },
+        },
+        phases: {
+          install: {
+            commands: [
+              'export HTTP_PROXY="http://$PROXY_USERNAME:$PROXY_PASSWORD@$PROXY_DOMAIN:$HTTP_PROXY_PORT"',
+              'export HTTPS_PROXY="https://$PROXY_USERNAME:$PROXY_PASSWORD@$PROXY_DOMAIN:$HTTPS_PROXY_PORT"',
+              'echo "--- Proxy Test ---"',
+              `curl -Is --connect-timeout 5 ${vpcProps.proxy.proxyTestUrl} | grep "HTTP/"`,
+            ],
+          },
+        },
+      });
+
+    }
+
+    return codebuild.BuildSpec.fromObject(buildSpec);
   }
 
   static generateVPCCodeBuildDefaults(scope: Construct, vpcProps?: VpcProps): pipelines.CodeBuildOptions | {} {
     if (!vpcProps) return {};
 
-    const vpcConfig = {
+    return {
       vpc: vpcProps.vpc,
       subnetSelection: vpcProps.vpc.isolatedSubnets ?? vpcProps.vpc.privateSubnets,
-    };
-
-    if (vpcProps.proxy?.proxySecretArn) {
-      return {
-        partialBuildSpec: codebuild.BuildSpec.fromObject({
-          version: '0.2',
-          env: {
-            'variables': {
-              NO_PROXY: vpcProps.proxy.noProxy.join(','),
-              AWS_STS_REGIONAL_ENDPOINTS: 'regional',
-            },
-            'secrets-manager': {
-              PROXY_USERNAME: vpcProps.proxy.proxySecretArn.concat(':username'),
-              PROXY_PASSWORD: vpcProps.proxy.proxySecretArn.concat(':password'),
-              HTTP_PROXY_PORT: vpcProps.proxy.proxySecretArn.concat(':http_proxy_port'),
-              HTTPS_PROXY_PORT: vpcProps.proxy.proxySecretArn.concat(':https_proxy_port'),
-              PROXY_DOMAIN: vpcProps.proxy.proxySecretArn.concat(':proxy_domain'),
-            },
-          },
-          phases: {
-            install: {
-              commands: [
-                'export HTTP_PROXY="http://$PROXY_USERNAME:$PROXY_PASSWORD@$PROXY_DOMAIN:$HTTP_PROXY_PORT"',
-                'export HTTPS_PROXY="https://$PROXY_USERNAME:$PROXY_PASSWORD@$PROXY_DOMAIN:$HTTPS_PROXY_PORT"',
-                'echo "--- Proxy Test ---"',
-                `curl -Is --connect-timeout 5 ${vpcProps.proxy.proxyTestUrl} | grep "HTTP/"`,
-              ],
-            },
-          },
-        }),
-        ...vpcConfig,
-      };
-    }
-
-    return {
-      partialBuildSpec: codebuild.BuildSpec.fromObject({
-        version: '0.2',
-      }),
-      ...vpcConfig,
     };
   }
 
@@ -163,15 +173,6 @@ export class CDKPipeline extends pipelines.CodePipeline {
     NagSuppressions.addResourceSuppressions(this, [
       {
         id: 'AwsSolutions-IAM5',
-        reason: 'Suppress AwsSolutions-IAM5 on the Resource wildcards.',
-        appliesTo: [
-          {
-            regex: '/^Resource::(.*)/g',
-          },
-        ],
-      },
-      {
-        id: 'AwsSolutions-IAM5',
         reason: 'Suppress AwsSolutions-IAM5 on the known Action wildcards.',
         appliesTo: [
           {
@@ -181,6 +182,36 @@ export class CDKPipeline extends pipelines.CodePipeline {
         ],
       },
     ], true);
+
+    NagSuppressions.addResourceSuppressionsByPath(
+      cdk.Stack.of(this),
+      [
+        `${cdk.Stack.of(this).stackName}/CdkPipeline/Pipeline`,
+        `${cdk.Stack.of(this).stackName}/CdkPipeline/UpdatePipeline`,
+      ],
+      [
+        {
+          id: 'AwsSolutions-IAM5',
+          reason: 'Suppress AwsSolutions-IAM5 on the self mutating pipeline.',
+        },
+      ],
+      true,
+    );
+
+    // Assets stage is only included if there are assets which must be uploaded
+    if (this.pipeline.stages.find((stage) => stage.stageName === 'Assets')) {
+      NagSuppressions.addResourceSuppressionsByPath(
+        cdk.Stack.of(this),
+        [`${cdk.Stack.of(this).stackName}/CdkPipeline/Assets`],
+        [
+          {
+            id: 'AwsSolutions-IAM5',
+            reason: 'Suppress AwsSolutions-IAM5 on the self mutating pipeline.',
+          },
+        ],
+        true,
+      );
+    }
   }
 
   private applyCodeGuruScan(threshold: CodeGuruSeverityThreshold) {
@@ -189,6 +220,7 @@ export class CDKPipeline extends pipelines.CodePipeline {
     const getBuildStage = () => this.pipeline.stages.find(stage => 'Build' === stage.stageName)!;
 
     const codeGuruSecurityStep = new CodeGuruSecurityStep(this, 'CodeGuruReviewStep', {
+      applicationName: this.pipelineName,
       applicationQualifier: this.applicationQualifier,
       sourceOutput: getSourceOutput(),
       threshold,

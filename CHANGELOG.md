@@ -6,6 +6,27 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Released]
 
+## [1.2.1] - 2024-03-05
+
+In this release we introduced the ability to customize and extend the list of available deployment stages. On top of the existing stages, you are allowed to define other stages differently from each other to support use cases where stages are not unified. We have also enabled AWS SSM ParameterStore to lookup for VPC ids stored there instead of passing them as plain text. Various bugfixes were also applied. **Please make sure to manually deploy the PipelineStack in your RES account as the CodeBuild Synth phase shell was changed from `sh` to `bash`, you can always refer to the instructions present in the README.md on how to run the ```cdk deploy``` command locally.**
+
+
+### Added
+- Support for extending deployment stages e.g: PRE_PROD and PROD
+- Support for different Stage definitions
+- Allow definition of RES stage to provision shared resources like Amazon ECR repositories
+- Support for looking up VPC IDs stored in SSM ParameterStore parameters for `VPC_FROM_LOOK_UP` VPC type
+### Changed
+- Changed shell for the CodeBuild Synth phase from `sh` to `bash`
+- Updated CDK version to 2.130.0
+- Updated 3rd party NPM libraries version
+### Fixed
+- Addressed minor issues according to the internal security review findings
+- NPM `package.json` files are ignored in `node_modules` folders even in sub-folders
+- Fixed exit code in the `audit:deps:python` when having vulnerability findings
+- Switched assert with expect in test files
+- Remove duplicate retain policy in the aspects(by default is destroy in the s3 construct)
+
 ## [1.2.0] - 2024-02-13
 
 In this release we have automated the process of creating S3 Compliance Buckets. We have also done minor refactoring to the way how we track the CDK code for security findings using CDK NAG Tool as well as resolved a minor CVE finding. Please refer to the README and perform a manual deployment to have the `ComplianceLogBucketStack` deployed into your RES account.

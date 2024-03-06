@@ -3,6 +3,7 @@
 
 import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
 import { PythonLambdaLayer } from './constructs/PythonLambdaLayer';
 
@@ -23,12 +24,23 @@ export class LambdaStack extends cdk.Stack {
       }),
     ] : [];
 
-    new lambda.Function(this, 'Function', {
+    const testFunction = new lambda.Function(this, 'Function', {
       functionName: `${props.applicationName}-${props.stageName}-test-lambda`,
       runtime: lambda.Runtime.PYTHON_3_12,
       code: lambda.Code.fromAsset('src/lambda-functions/test'),
       handler: 'test-lambda.lambda_handler',
       layers: [...layers],
     });
+
+    NagSuppressions.addResourceSuppressions(
+      testFunction, [{
+        id: 'AwsSolutions-IAM4',
+        reason: 'Suppress AwsSolutions-IAM4 approved managed policies',
+        appliesTo: [
+          {
+            regex: '/(.*)(AWSLambdaBasicExecutionRole)(.*)$/g',
+          },
+        ],
+      }], true);
   };
 }

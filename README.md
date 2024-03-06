@@ -75,7 +75,7 @@ By default, the Pipeline is configured to run **without** a VPC. To run inside a
 
 Use `VPC` if you want a single, self-contained pipeline running in a VPC. Not recommended for use with multiple code pipelines in the same account. The VPC is created using defaulted settings.
 
-Use `VPC_FROM_LOOK_UP` to look up an existing VPC based on its vpc ID. It is recommended to create this VPC prior to deploying the pipeline. Multiple deployments of the pipeline can share the same VPC.
+Use `VPC_FROM_LOOK_UP` to look up an existing VPC based on its vpc ID. It is recommended to create this VPC prior to deploying the pipeline. Multiple deployments of the pipeline can share the same VPC. If you want to store this vpc ID into SSM then you can do so by prefixing it with `resolve:ssm:` e.g: `resolve:ssm:my-ssm-parameter` where the `my-ssm-parameter` is the string SSM parameter name that contains the vpcId value.
 
 Note: Switching between VPC options may require a complete tear down and redeploy of the pipeline
 
@@ -100,6 +100,7 @@ npm ci ### it installs the frozen dependencies from package-lock.json
 
 ### Required
 Amazon S3 server access logging is a security best practice and should be always enabled. The compliancy logs configuration gets applied to S3 buckets in the bin/aspects.ts for each stage RES/DEV/INT.
+If you already have existing buckets for compliance logs then set their names in `complianceLogBucketName` property in the [AppConfig](./config/AppConfig.ts).
 
 Make sure that the destination bucket has policy granting `s3:PutObject` permissions to the logging service principal `logging.s3.amazonaws.com` ([see documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/enable-server-access-logging.html)).
 
@@ -139,6 +140,75 @@ npm run cdk bootstrap -- --profile prod --qualifier ${CDK_QUALIFIER} --cloudform
 arn:aws:iam::aws:policy/AdministratorAccess \
 --trust resources_account_id aws://prod_account_id/your_aws_region
 ```
+
+#### Define a new stage
+You can create new stages other than the RES, DEV, and INT.
+
+##### Create environment variables 
+It is recommended to create environment variables for the new stage in the `export_vars.sh` file as it is created for the RES, DEV, and INT stages. As an example let us introduce the new PRE_PROD stage that will be present a new pre Production account.
+
+You can edit the `export_vars.sh` file with your favorite editor or run the following command:
+```bash
+echo "export ACCOUNT_PRE_PROD=<your account id>;" >> export_vars.sh;
+echo "export PRE_PROD_ACCOUNT_AWS_PROFILE=<your aws profile>;" >> export_vars.sh;
+```
+
+#### After you modify the placeholders in the script, source those variables:
+
+```bash
+source export_vars.sh
+```
+
+##### Bootstrap the account
+The account of the new stage **must** be bootstrapped as the other accounts and has to trust in the RES account. 
+
+```bash
+npm run cdk bootstrap -- --profile $PRE_PROD_ACCOUNT_AWS_PROFILE --qualifier ${CDK_QUALIFIER} --cloudformation-execution-policies \
+arn:aws:iam::aws:policy/AdministratorAccess \
+--trust ${ACCOUNT_RES} aws://${ACCOUNT_PRE_PROD}/${AWS_REGION}
+```
+
+##### Extend the pipeline
+In order to the pipeline use the new stage it needs to be added to the deployments definition of the `PipelineStack` in the `bin/app.ts`. The order of the stages is controlled by the position in the deployments definition. The account number of the stage can be retrieved from the environment variable, that has been created in the `export_vars.sh`, and added to the `config/AppConfig.ts`. The compliance log bucket has to defined as well in the `config/AppConfig.ts`.
+
+Example `config/AppConfig.ts`:
+```typescript
+const deploymentAccounts = {
+  RES: Environment.getEnvVar('ACCOUNT_RES'),
+  DEV: Environment.getEnvVar('ACCOUNT_DEV'),
+  INT: Environment.getEnvVar('ACCOUNT_INT'),
+  PRE_PROD: Environment.getEnvVar('ACCOUNT_PRE_PROD'),
+};
+
+export const AppConfig: IAppConfig = {
+    ...
+    complianceLogBucketName: {
+        RES: `compliance-log-${deploymentAccounts.RES}-${region}`,
+        DEV: `compliance-log-${deploymentAccounts.DEV}-${region}`,
+        INT: `compliance-log-${deploymentAccounts.INT}-${region}`,
+        PRE_PROD: `compliance-log-${deploymentAccounts.PRE_PROD}-${region}`,
+    },
+    ...
+}
+```
+
+Then the `bin/app.ts` can be updated to use the newly created configuration.
+```typescript
+new PipelineStack(app, `${AppConfig.applicationName}PipelineStack`, {
+  env: { account: AppConfig.deploymentAccounts.RES, region: AppConfig.region },
+  applicationName: AppConfig.applicationName,
+  applicationQualifier: AppConfig.applicationQualifier,
+  logRetentionInDays: AppConfig.logRetentionInDays,
+  deployments: {
+    RES: { account: AppConfig.deploymentAccounts.RES, region: AppConfig.region },
+    DEV: { account: AppConfig.deploymentAccounts.DEV, region: AppConfig.region },
+    INT: { account: AppConfig.deploymentAccounts.INT, region: AppConfig.region },
+    PRE_PROD: { account: AppConfig.deploymentAccounts.PRE_PROD, region: AppConfig.region },
+  },
+  ...
+}
+```
+
 
 #### Deploy all the stacks
 
@@ -218,7 +288,7 @@ npm run audit:fix:license
 This will only result with new Notice file generation in case any of the `package.json` for NPM, `Pipfile` and `requirements.txt` for Python projects has been modified. While the files are untouched the license is considered up to date.
 
 ### Configuration options
-We have listed a set of example licenses which are in general prohibited if you plan to deploy anything to production systems and keep the code private. You can change these licenses anytime by updating the ```licensecheck.json``` file.
+The script configuration can be specified in the ```licensecheck.json``` file.
 
 Example configuration:
 
@@ -241,7 +311,7 @@ Example configuration:
 * Sub folder which `Pipfile` or `package.json` file should not be included into the License check should be listen under the `npm.excludedSubProjects` or `python.excludedSubProjects` attributes.
 * For NPM packages the subfolder also needs to contain a package-lock.json file to ensure the right dependencies will be installed and checked.
 * Dependencies can be excluded from the license verification for NPM and Python as well.
-* Python has many package management solution. The Vanilla Pipeline supports `Pipenv` and the regular `requirements.txt`
+* Python has many package management solution. The CICD Boot supports `Pipenv` and the regular `requirements.txt`
  files. With the ```licensecheck.json``` file `python.allowedTypes` allows to configure which packageManager package types considered. The values are `Pipenv`, and the `requirements.txt`. 
 
 ## Appendix
@@ -299,13 +369,13 @@ source exports_vars.sh ### source the env vars with the right account ids and pr
 npm run cdk synth ### this command generates the cdk.context.json
 ### 3. Add the cdk.context.json to git remote
 git add cdk.context.json ### re-add cdk.context.json
-git commit -am "feat: re-added cdk.context.json"
+git commit -am "Re-added cdk.context.json"
 git push -u origin ### Push changes to remote
 
 ```
 
 ### Working with Python dependencies
-The project utilizes the [Pipenv](https://pipenv.pypa.io/en/latest/). Pipenv automatically creates and manages a virtualenv for your project, as well as adds/removes packages from your `Pipfile` as you install/uninstall packages. It also generates a project `Pipfile.lock`, which is used to produce deterministic builds.
+The project utilize the [Pipenv](https://pipenv.pypa.io/en/latest/). Pipenv automatically creates and manages a virtual env for your projects, as well as adds/removes packages from your `Pipfile` as you install/uninstall packages. It also generates a project `Pipfile.lock`, which is used to produce deterministic builds.
 
 The Python dependencies should be maintained in `Pipfile` instead of the `requirements.txt` file and requirements.txt files usage should be avoided.
 

@@ -3,12 +3,11 @@
 
 import * as pipelines from 'aws-cdk-lib/pipelines';
 import { CDKPipeline } from './CDKPipeline';
-import { STAGE } from '../../../config/Types';
 
 export class PreDeployBuildStep extends pipelines.CodeBuildStep {
-  private stage: STAGE;
+  private stage: string;
 
-  constructor(stage: STAGE, props: Omit<pipelines.CodeBuildStepProps, 'commands'>) {
+  constructor(stage: string, props: Omit<pipelines.CodeBuildStepProps, 'commands'>) {
     super(`PreDeploy${stage}`, {
       ...props,
       env: {

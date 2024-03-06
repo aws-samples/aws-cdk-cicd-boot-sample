@@ -4,6 +4,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { aws_s3 } from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { IVpcConfig } from '../../../config/VpcConfig';
 
@@ -27,8 +28,10 @@ export class VPCStack extends cdk.Stack {
         break;
 
       case 'VPC_FROM_LOOK_UP':
+        const vpcConfig = props.vpcConfig.VPC_FROM_LOOK_UP!;
+        const vpcId = vpcConfig.vpcId.startsWith('resolve:ssm:') ? StringParameter.valueFromLookup(this, vpcConfig.vpcId.replace('resolve:ssm:', '')) : vpcConfig.vpcId;
         this.vpc = ec2.Vpc.fromLookup(this, 'vpc', {
-          vpcId: props.vpcConfig.VPC_FROM_LOOK_UP?.vpcId,
+          vpcId,
         });
         break;
 

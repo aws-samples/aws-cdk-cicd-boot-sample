@@ -51,5 +51,19 @@ export class ComplianceLogBucketStack extends cdk.Stack {
         },
       ],
     }]);
+
+    NagSuppressions.addResourceSuppressionsByPath(this, [
+      `${cdk.Stack.of(this)}/LambdaFunction/ServiceRole/Resource`,
+      `${cdk.Stack.of(this)}/Provider/framework-onEvent/ServiceRole/Resource`,
+    ], [{
+      id: 'AwsSolutions-IAM4',
+      reason: 'Suppress AwsSolutions-IAM4 approved managed policies',
+      appliesTo: [
+        {
+          regex: '/(.*)(AWSLambdaBasicExecutionRole)(.*)$/g',
+        },
+      ],
+    }], true);
+
   }
 }

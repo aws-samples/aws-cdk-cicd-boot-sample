@@ -10,6 +10,7 @@ import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
 
 interface CodeGuruSecurityStepProps {
+  applicationName: string;
   applicationQualifier: string;
   sourceOutput: codepipeline.Artifact;
   threshold: CodeGuruSeverityThreshold;
@@ -33,12 +34,11 @@ export class CodeGuruSecurityStep extends Construct {
     super(scope, id);
     const stack = cdk.Stack.of(this);
 
+    const scanName = props.applicationName.replace(/[\W_]+/g, '-');
+
     const role = new iam.Role(this, `${props.applicationQualifier}CodeGuruSecurityCodebuildAccessRole`, {
       roleName: `codeguru-codebuild-${stack.account}-${stack.region}-${props.applicationQualifier}`,
       assumedBy: new iam.ServicePrincipal('codebuild.amazonaws.com'),
-      managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonCodeGuruSecurityScanAccess'),
-      ],
       maxSessionDuration: cdk.Duration.seconds(3600),
       inlinePolicies: {
         logRetentionOperation: new iam.PolicyDocument({
@@ -69,6 +69,17 @@ export class CodeGuruSecurityStep extends Construct {
                 cdk.Arn.format({ service: 'codebuild', resource: 'report-group/CodeGuruSecurity-*' }, stack),
               ],
             }),
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: [
+                'codebuild:CreateReportGroup',
+                'codebuild:CreateReport',
+                'codebuild:UpdateReport',
+                'codebuild:BatchPutTestCases',
+                'codebuild:BatchPutCodeCoverages',
+              ],
+              resources: [`arn:aws:codeguru-security:*:*:scans/${scanName}`],
+            }),
           ],
         }),
       },
@@ -89,7 +100,7 @@ export class CodeGuruSecurityStep extends Construct {
         phases: {
           build: {
             commands: [
-              'SCAN_NAME=$(echo $CODEBUILD_INITIATOR | sed \'s/\\//-/g\')',
+              `SCAN_NAME=${scanName}`,
               `python /usr/app/codeguru/command.py --source_path . --aws_region ${stack.region} --output_file_prefix codeguru-security-results --scan_name "$SCAN_NAME" --fail_on_severity ${props.threshold}`,
               'cat codeguru-security-results.sarif.json',
             ],
@@ -105,7 +116,7 @@ export class CodeGuruSecurityStep extends Construct {
     });
 
     NagSuppressions.addResourceSuppressions(role, [{
-      id: 'AwsSolutions-IAM4',
+      id: 'AwsSolutions-IAM5',
       reason: 'This is managed policy recommended by the AWS CodeGuru team.',
     }],
     true,

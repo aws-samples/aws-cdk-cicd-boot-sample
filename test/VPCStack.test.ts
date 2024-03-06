@@ -132,3 +132,62 @@ describe('vpc-stack-test-omission', () => {
     template.resourceCountIs('AWS::EC2::VPCEndpoint', 0);
   });
 });
+
+describe('vpc-stack-from-lookup', () => {
+  const app = new cdk.App();
+
+  const vpcConfig: IVpcConfig = {
+    type: 'VPC_FROM_LOOK_UP',
+    VPC_FROM_LOOK_UP: {
+      vpcId: 'vpc-12345',
+    },
+  };
+
+  const vpcStack = new VPCStack(app, 'VPCStackFromLookUp', {
+    env: { account: TestAppConfig.deploymentAccounts.RES, region: TestAppConfig.region },
+    vpcConfig,
+    flowLogsBucketName: TestAppConfig.complianceLogBucketName.RES,
+  });
+
+  const template = Template.fromStack(vpcStack);
+
+  test('Check if VPC is looked up', () => {
+    template.resourceCountIs('AWS::EC2::VPC', 0);
+
+    expect(vpcStack.vpc).toBeDefined();
+    expect(vpcStack.vpc!.vpcId).toEqual('vpc-12345');
+  });
+
+});
+
+describe('vpc-stack-from-lookup-with-ssm', () => {
+  const app = new cdk.App({
+    context: {
+      [(`ssm:account=${TestAppConfig.deploymentAccounts.RES}:parameterName=/ssm/path:region=${TestAppConfig.region}`)]: 'vpc-23456',
+      [(`vpc-provider:account=${TestAppConfig.deploymentAccounts.RES}:filter.vpc-id=vpc-23456:region=${TestAppConfig.region}:returnAsymmetricSubnets=true`)]: {
+        vpcId: 'vpc-23456',
+      },
+    },
+  });
+
+  const vpcStack2 = new VPCStack(app, 'VPCStackFromLookUpFromSsm', {
+    env: { account: TestAppConfig.deploymentAccounts.RES, region: TestAppConfig.region },
+    vpcConfig: {
+      type: 'VPC_FROM_LOOK_UP',
+      VPC_FROM_LOOK_UP: {
+        vpcId: 'resolve:ssm:/ssm/path',
+      },
+    },
+    flowLogsBucketName: TestAppConfig.complianceLogBucketName.RES,
+  });
+
+  const template = Template.fromStack(vpcStack2);
+
+  test('Check if VPC is looked up through ssm', () => {
+    template.resourceCountIs('AWS::EC2::VPC', 0);
+
+    expect(vpcStack2.vpc).toBeDefined();
+    expect(vpcStack2.vpc!.vpcId).toEqual('vpc-23456');
+  });
+
+});

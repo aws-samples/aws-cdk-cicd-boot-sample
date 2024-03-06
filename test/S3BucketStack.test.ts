@@ -1,7 +1,6 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
-import { assert } from 'console';
 import * as cdk from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
 import * as kms from 'aws-cdk-lib/aws-kms';
@@ -35,7 +34,7 @@ describe('s3-bucket-stack-test', () => {
 
   test('Check if S3 bucket retain policy exists', () => {
     const bucket = Object.values(s3Template.findResources('AWS::S3::Bucket'))[0];
-    assert(bucket.DeletionPolicy == 'Retain');
+    expect(bucket.DeletionPolicy).toBe('Delete');
   });
 
   test('Check if KMS encryption exists', () => {

@@ -1,15 +1,14 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
-import { Stack } from 'aws-cdk-lib';
+import * as cdk from 'aws-cdk-lib';
 import * as kms from 'aws-cdk-lib/aws-kms';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
-import { STAGE } from '../../../config/Types';
 
 export interface S3BucketProps extends s3.BucketProps {
   readonly applicationQualifier: string;
-  readonly stageName: STAGE;
+  readonly stageName: string;
   readonly bucketName: string;
   readonly encryptionKey: kms.IKey;
 }
@@ -17,8 +16,8 @@ export interface S3BucketProps extends s3.BucketProps {
 
 export class S3Bucket extends s3.Bucket {
   constructor(scope: Construct, id: string, props: S3BucketProps) {
-    const region = Stack.of(scope).region;
-    const account = Stack.of(scope).account;
+    const region = cdk.Stack.of(scope).region;
+    const account = cdk.Stack.of(scope).account;
 
     super(scope, id, {
       ...props,

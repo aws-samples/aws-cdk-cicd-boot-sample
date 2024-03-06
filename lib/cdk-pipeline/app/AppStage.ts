@@ -5,8 +5,6 @@ import * as cdk from 'aws-cdk-lib';
 import { AwsSolutionsChecks } from 'cdk-nag';
 import { Construct } from 'constructs';
 import { SecurityControls } from '../../../bin/aspects';
-import { STAGE } from '../../../config/Types';
-import { NagUtils } from '../../../utils/suppressions';
 import { LambdaStack } from '../../stacks/app/LambdaStack';
 import { MonitoringStack } from '../../stacks/app/MonitoringStack';
 import { S3BucketStack } from '../../stacks/app/S3BucketStack';
@@ -19,7 +17,7 @@ interface Props extends cdk.StageProps {
   applicationQualifier: string;
   logRetentionInDays: string;
   resAccount: string;
-  stage: STAGE;
+  stage: string;
   complianceLogBucketName: string;
 }
 
@@ -41,6 +39,7 @@ export class AppStage extends cdk.Stage {
       resAccount: props.resAccount,
       stageName: props.stage,
       applicationName: props.applicationName,
+      encryptionKey: encryptionStack.kmsKey,
     });
 
     new LambdaStack(this, `${props.applicationName}LambdaStack`, {
@@ -70,10 +69,9 @@ export class AppStage extends cdk.Stage {
       ),
     );
     cdk.Aspects.of(this).add(new AwsSolutionsChecks({ verbose: false }));
-    NagUtils.addSuppressions(this);
   }
 
-  static getLogRetentionRoleArn(account: string, region: string, stageName: STAGE, applicationName: string) {
+  static getLogRetentionRoleArn(account: string, region: string, stageName: string, applicationName: string) {
     return LogRetentionRoleStack.getRoleArn(account, region, stageName, applicationName);
   }
 }

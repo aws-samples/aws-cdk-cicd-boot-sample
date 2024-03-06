@@ -7,7 +7,7 @@ name = "pypi"
 pyopenssl = "==24.0.0"
 pandas = "==2.2.0"
 confluent-kafka = "==2.3.0"
-cryptography = "==42.0.2"
+cryptography = "==42.0.4"
 
 [dev-packages]
 

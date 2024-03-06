@@ -17,6 +17,7 @@ export const TestAppConfig: IAppConfig = {
     RES: '123456789012',
     DEV: '123456789012',
     INT: '123456789012',
+    EXP: '234567890123',
   },
   applicationQualifier: 'test',
   region: 'eu-west-1',

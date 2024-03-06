@@ -10,17 +10,30 @@ type Parameter = 'AccountRes' | 'AccountDev' | 'AccountInt' | string;
 
 interface Props extends cdk.StackProps {
   applicationQualifier: string;
-  parameter: {
+  parameter?: {
     [key in Parameter]: string;
   };
 }
 
 export class SSMParameterStack extends cdk.Stack {
+  private static instance: SSMParameterStack;
+
   constructor(scope: Construct, id: string, props: Props) {
     super(scope, id, props);
 
-    Object.entries(props.parameter).forEach(([parameterName, parameterValue]) => {
-      SSMParameterStack.createParameter(this, props.applicationQualifier, parameterName, parameterValue);
+    SSMParameterStack.instance = this;
+
+    if (props.parameter) {
+      Object.entries(props.parameter!).forEach(([parameterName, parameterValue]) => {
+        SSMParameterStack.createParameter(this, props.applicationQualifier, parameterName, parameterValue);
+      });
+    }
+  }
+
+  static createParameterInSSMParameterStack(applicationQualifier: string, parameterName: string, parameterValue: string) {
+    return new ssm.StringParameter(SSMParameterStack.instance, `${parameterName}Parameter`, {
+      parameterName: `/${applicationQualifier}/${parameterName}`,
+      stringValue: parameterValue,
     });
   }
 
