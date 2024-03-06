@@ -4612,7 +4612,7 @@ MIT
     SOFTWARE
 
 
-@types/node 20.11.21
+@types/node 20.11.24
 MIT
     MIT License
 
@@ -4812,7 +4812,7 @@ MIT
     SOFTWARE
 
 
-@typescript-eslint/eslint-plugin 7.1.0
+@typescript-eslint/eslint-plugin 7.1.1
 MIT
 MIT License
 
@@ -4837,7 +4837,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-@typescript-eslint/parser 7.1.0
+@typescript-eslint/parser 7.1.1
 BSD-2-Clause
 TypeScript ESLint Parser
 Copyright JS Foundation and other contributors, https://js.foundation
@@ -4863,7 +4863,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-@typescript-eslint/scope-manager 7.1.0
+@typescript-eslint/scope-manager 7.1.1
 MIT
 MIT License
 
@@ -4888,7 +4888,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-@typescript-eslint/type-utils 7.1.0
+@typescript-eslint/type-utils 7.1.1
 MIT
 MIT License
 
@@ -4913,7 +4913,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-@typescript-eslint/types 7.1.0
+@typescript-eslint/types 7.1.1
 MIT
 MIT License
 
@@ -4938,7 +4938,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-@typescript-eslint/typescript-estree 7.1.0
+@typescript-eslint/typescript-estree 7.1.1
 BSD-2-Clause
 TypeScript ESTree
 
@@ -4968,7 +4968,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-@typescript-eslint/utils 7.1.0
+@typescript-eslint/utils 7.1.1
 MIT
 MIT License
 
@@ -4993,7 +4993,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-@typescript-eslint/visitor-keys 7.1.0
+@typescript-eslint/visitor-keys 7.1.1
 MIT
 MIT License
 
@@ -5864,7 +5864,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-aws-cdk-lib 2.130.0
+aws-cdk-lib 2.131.0
 Apache-2.0
                                  Apache License
                            Version 2.0, January 2004
@@ -7246,7 +7246,7 @@ Apache-2.0
    limitations under the License.
 
 
-cdk-nag 2.28.48
+cdk-nag 2.28.55
 Apache-2.0
 
                                  Apache License
