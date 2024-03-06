@@ -285,7 +285,7 @@ npm run audit:fix:license
 ```
 
 **Note**
-This will only result with new Notice file generation in case any of the `package.json` for NPM, `Pipfile` and `requirements.txt` for Python projects has been modified. While the files are untouched the license is considered up to date.
+We have listed a set of example licenses which are in general prohibited if you plan to deploy anything to production systems and keep the code private. You can change these licenses anytime by updating the ```licensecheck.json``` file.
 
 ### Configuration options
 The script configuration can be specified in the ```licensecheck.json``` file.
