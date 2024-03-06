@@ -9,6 +9,7 @@ For describing all the log groups in the target account and add log log_groups d
 The scripts assumes a role that is created in the `lib/test-role.ts` and the role name is passed as env var;
 This env var is defined in the `lib/cdk-pipeline/core/PreDeployBuildStep.ts`
 """
+
 import logging
 import os
 
