@@ -369,7 +369,7 @@ source exports_vars.sh ### source the env vars with the right account ids and pr
 npm run cdk synth ### this command generates the cdk.context.json
 ### 3. Add the cdk.context.json to git remote
 git add cdk.context.json ### re-add cdk.context.json
-git commit -am "Re-added cdk.context.json"
+git commit -am "feat: re-added cdk.context.json"
 git push -u origin ### Push changes to remote
 
 ```
@@ -458,7 +458,7 @@ git merge ${CICD_BOOT_REMOTE}/${VERSION_TO_UPDATE_TO};
 
 ## Resolve Merge conflicts in case there are any, then commit the changes
 # git add .
-# git commit -m "Updated to v1.1.2"
+# git commit -m "feat: updated to v1.1.2"
 ```
 
 ## Static Application Security Testing (SAST)
