@@ -18,7 +18,7 @@ In this release we introduced the ability to customize and extend the list of av
 - Support for looking up VPC IDs stored in SSM ParameterStore parameters for `VPC_FROM_LOOK_UP` VPC type
 ### Changed
 - Changed shell for the CodeBuild Synth phase from `sh` to `bash`
-- Updated CDK version to 2.130.0
+- Updated CDK version to 2.131.0
 - Updated 3rd party NPM libraries version
 ### Fixed
 - Addressed minor issues according to the internal security review findings
