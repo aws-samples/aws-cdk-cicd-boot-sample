@@ -510,8 +510,6 @@ be consistent across those files.
 * `npm run audit:license`               validate the NOTICE file
 * `npm run audit:fix:license`           update the NOTICE file of the project
 * `npm run license`                     validate the NOTICE file
-* `npm run license:default`             validate the NOTICE file on Linux systems
-* `npm run license:macos`               validate the NOTICE file on MacOS systems
 * `npm run lint`                        check for linting issues in the project
 * `npm run lint:fix`                    fix linting issues in the project (do not forget to add & commit the fixed files)
 * `npm run cdk deploy -- --all`         deploy all stacks to your configured AWS account/region
