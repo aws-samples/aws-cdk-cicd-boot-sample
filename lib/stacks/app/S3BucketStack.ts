@@ -3,6 +3,7 @@
 
 import * as cdk from 'aws-cdk-lib';
 import * as kms from 'aws-cdk-lib/aws-kms';
+import * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { STAGE } from '../../../config/Types';
 import { S3Bucket } from '../../cdk-pipeline/core/S3Bucket';
@@ -15,10 +16,13 @@ interface Props extends cdk.StackProps {
 }
 
 export class S3BucketStack extends cdk.Stack {
+
+  readonly bucket: s3.IBucket;
+
   constructor(scope: Construct, id: string, props: Props) {
     super(scope, id, props);
 
-    new S3Bucket(this, 'S3Bucket', {
+    this.bucket = new S3Bucket(this, 'S3Bucket', {
       applicationQualifier: props.applicationQualifier,
       stageName: props.stageName,
       bucketName: props.bucketName,

@@ -7,11 +7,13 @@ import { Construct } from 'constructs';
 import { CodeCommitRepositoryConstruct } from './constructs/CodeCommitRepositoryConstruct';
 import { CodeStarConnectionConstruct } from './constructs/CodeStarConnectionConstruct';
 import { IRepositoryConfig } from '../../../config/Types';
+import { IVpcProps } from '../../cdk-pipeline/core/CDKPipeline';
 
 interface RepositoryProps extends cdk.StackProps {
   applicationName: string;
   applicationQualifier: string;
   repositoryConfig: IRepositoryConfig;
+  vpcProps?: IVpcProps;
 }
 
 export class RepositoryStack extends cdk.Stack {
@@ -36,6 +38,7 @@ export class RepositoryStack extends cdk.Stack {
           applicationName: props.applicationName,
           applicationQualifier: props.applicationQualifier,
           ...props.repositoryConfig.CODECOMMIT,
+          vpcProps: props.vpcProps,
         }).pipelineInput;
         this.repositoryBranch = props.repositoryConfig.CODECOMMIT.branch;
         this.pipelineEnvVars = {};

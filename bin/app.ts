@@ -19,13 +19,6 @@ import { NagUtils } from '../utils/suppressions';
 
 const app = new cdk.App();
 
-const repositoryStack = new RepositoryStack(app, `${AppConfig.applicationName}Repository`, {
-  env: { account: AppConfig.deploymentAccounts.RES, region: AppConfig.region },
-  applicationName: AppConfig.applicationName,
-  applicationQualifier: AppConfig.applicationQualifier,
-  repositoryConfig: AppConfig.repositoryConfig,
-});
-
 new ComplianceLogBucketStack(app, `${AppConfig.applicationName}ComplianceLogBucketStack`, {
   complianceLogBucketName: AppConfig.complianceLogBucketName.RES,
 });
@@ -42,6 +35,17 @@ const vpcStack = new VPCStack(app, `${AppConfig.applicationName}VPCStack`, {
   vpcConfig: AppConfig.vpc,
   proxy: AppConfig.proxy,
   flowLogsBucketName: AppConfig.complianceLogBucketName.RES,
+});
+
+const repositoryStack = new RepositoryStack(app, `${AppConfig.applicationName}Repository`, {
+  env: { account: AppConfig.deploymentAccounts.RES, region: AppConfig.region },
+  applicationName: AppConfig.applicationName,
+  applicationQualifier: AppConfig.applicationQualifier,
+  repositoryConfig: AppConfig.repositoryConfig,
+  vpcProps: (vpcStack.vpc ? {
+    vpc: vpcStack.vpc,
+    proxy: AppConfig.proxy,
+  } : undefined),
 });
 
 const encryptionStack = new EncryptionStack(app, `${AppConfig.applicationName}EncryptionStack`, {
