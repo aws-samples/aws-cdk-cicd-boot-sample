@@ -8,7 +8,6 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as pipelines from 'aws-cdk-lib/pipelines';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct, IConstruct } from 'constructs';
-import * as _ from 'lodash';
 import { CodeGuruSecurityStep, CodeGuruSeverityThreshold } from './constructs/CodeGuruSecurityStepConstruct';
 
 interface Props extends PipelineProps {
@@ -17,7 +16,7 @@ interface Props extends PipelineProps {
   rolePolicies?: iam.PolicyStatement[];
 }
 
-export interface VpcProps {
+export interface IVpcProps {
   vpc: ec2.IVpc;
   proxy?: {
     noProxy: string[];
@@ -32,7 +31,7 @@ export interface PipelineProps {
   isDockerEnabledForSynth?: boolean;
   buildImage?: codebuild.IBuildImage;
   codeGuruScanThreshold?: CodeGuruSeverityThreshold;
-  vpcProps?: VpcProps;
+  vpcProps?: IVpcProps;
   pipelineVariables?: {[key in string]: string};
   primaryOutputDirectory: string;
 }
@@ -51,7 +50,6 @@ class CodeBuildAspect implements cdk.IAspect {
 export class CDKPipeline extends pipelines.CodePipeline {
   static readonly pipelineCommands: string[] =
     [
-      './scripts/proxy.sh',
       './scripts/check-audit.sh',
       '. ./scripts/warming.sh',
       './scripts/build.sh',
@@ -86,7 +84,7 @@ export class CDKPipeline extends pipelines.CodePipeline {
         primaryOutputDirectory: props.primaryOutputDirectory,
       }),
       codeBuildDefaults: {
-        ...CDKPipeline.generateVPCCodeBuildDefaults(scope, props.vpcProps),
+        ...CDKPipeline.generateVPCCodeBuildDefaults(props.vpcProps),
         partialBuildSpec: CDKPipeline.getPartialBuildSpec(props.vpcProps),
         buildEnvironment: {
           buildImage: props.buildImage,
@@ -103,57 +101,85 @@ export class CDKPipeline extends pipelines.CodePipeline {
   }
 
   static getDefaultPartialBuildSpec() {
-    return {
+    return codebuild.BuildSpec.fromObject({
       version: '0.2',
       env: {
         shell: 'bash',
       },
-    };
+    });
   }
 
-  static getPartialBuildSpec(vpcProps?: VpcProps) {
+  static getPartialBuildSpec(vpcProps?: IVpcProps) {
     const buildSpec = CDKPipeline.getDefaultPartialBuildSpec();
 
     if (vpcProps?.proxy?.proxySecretArn) {
-      // deep merge with
-      _.merge(buildSpec, {
+      const {
+        proxy: {
+          noProxy,
+          proxySecretArn,
+          proxyTestUrl,
+        },
+      } = vpcProps;
+
+      // Construct environment variables
+      const envVariables = {
+        NO_PROXY: noProxy.join(', '),
+        AWS_STS_REGIONAL_ENDPOINTS: 'regional',
+      };
+
+      // Construct secrets manager object
+      const secretsManager = {
+        PROXY_USERNAME: `${proxySecretArn}:username`,
+        PROXY_PASSWORD: `${proxySecretArn}:password`,
+        HTTP_PROXY_PORT: `${proxySecretArn}:http_proxy_port`,
+        HTTPS_PROXY_PORT: `${proxySecretArn}:https_proxy_port`,
+        PROXY_DOMAIN: `${proxySecretArn}:proxy_domain`,
+      };
+
+      // Merge the constructed objects with existing buildSpec
+      return codebuild.mergeBuildSpecs(buildSpec, codebuild.BuildSpec.fromObject({
         env: {
-          'variables': {
-            NO_PROXY: vpcProps.proxy.noProxy.join(', '),
-            AWS_STS_REGIONAL_ENDPOINTS: 'regional',
-          },
-          'secrets-manager': {
-            PROXY_USERNAME: vpcProps.proxy.proxySecretArn.concat(':username'),
-            PROXY_PASSWORD: vpcProps.proxy.proxySecretArn.concat(':password'),
-            HTTP_PROXY_PORT: vpcProps.proxy.proxySecretArn.concat(':http_proxy_port'),
-            HTTPS_PROXY_PORT: vpcProps.proxy.proxySecretArn.concat(':https_proxy_port'),
-            PROXY_DOMAIN: vpcProps.proxy.proxySecretArn.concat(':proxy_domain'),
-          },
+          'variables': envVariables,
+          'secrets-manager': secretsManager,
         },
         phases: {
           install: {
             commands: [
-              'export HTTP_PROXY="http://$PROXY_USERNAME:$PROXY_PASSWORD@$PROXY_DOMAIN:$HTTP_PROXY_PORT"',
-              'export HTTPS_PROXY="https://$PROXY_USERNAME:$PROXY_PASSWORD@$PROXY_DOMAIN:$HTTPS_PROXY_PORT"',
-              'echo "--- Proxy Test ---"',
-              `curl -Is --connect-timeout 5 ${vpcProps.proxy.proxyTestUrl} | grep "HTTP/"`,
+              CDKPipeline.getInstallCommands(vpcProps),
             ],
           },
         },
-      });
-
+      }));
     }
 
-    return codebuild.BuildSpec.fromObject(buildSpec);
+    return buildSpec;
   }
 
-  static generateVPCCodeBuildDefaults(scope: Construct, vpcProps?: VpcProps): pipelines.CodeBuildOptions | {} {
+  static generateVPCCodeBuildDefaults(vpcProps?: IVpcProps): pipelines.CodeBuildOptions | {} {
     if (!vpcProps) return {};
 
     return {
       vpc: vpcProps.vpc,
       subnetSelection: vpcProps.vpc.isolatedSubnets ?? vpcProps.vpc.privateSubnets,
     };
+  }
+
+  public static getInstallCommands(vpcProps: IVpcProps) : string {
+    return 'export HTTP_PROXY="http://$PROXY_USERNAME:$PROXY_PASSWORD@$PROXY_DOMAIN:$HTTP_PROXY_PORT"; ' +
+    'export HTTPS_PROXY="https://$PROXY_USERNAME:$PROXY_PASSWORD@$PROXY_DOMAIN:$HTTPS_PROXY_PORT"; ' +
+    'echo "--- Proxy Test ---"; ' +
+    `curl -Is --connect-timeout 5 ${vpcProps!.proxy!.proxyTestUrl} | grep "HTTP/"; ` +
+    'if [ -f /var/run/docker.pid ]; then ' +
+    'echo "--- Configuring docker env ---" ' +
+    '&& mkdir ~/.docker/ ' +
+    '&& echo -n "{\\"proxies\\": {\\"default\\": {\\"httpProxy\\": \\"$HTTP_PROXY\\",\\"httpsProxy\\": \\"$HTTPS_PROXY\\",\\"noProxy\\": \\"$NO_PROXY\\"}}}" > ~/.docker/config.json ' +
+    '&& cat ~/.docker/config.json ' +
+    '&& echo "Kill and restart the docker daemon so that it reads the PROXY env variables" ' +
+    '&& kill "$(cat /var/run/docker.pid)" ' +
+    '&& while kill -0 "$(cat /var/run/docker.pid)" ; do sleep 1 ; done ' +
+    '&& /usr/local/bin/dockerd-entrypoint.sh > /dev/null 2>&1 ' +
+    '&& echo "--- Docker daemon restarted ---"; ' +
+    'fi';
   }
 
   public buildPipeline(): void {

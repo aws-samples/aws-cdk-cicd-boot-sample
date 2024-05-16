@@ -19,11 +19,25 @@ export class MonitoringStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: Props) {
     super(scope, id, props);
 
+    const encryptionKey = new kms.Key(this, 'KMSKey', {
+      enableKeyRotation: true,
+      alias: `${props.applicationName}-${props.stageName}-Monitoring-key`,
+    });
+
+    const myCustomPolicy = new iam.PolicyStatement({
+      actions: [
+        'kms:GenerateDataKey',
+        'kms:Describe*',
+        'kms:Decrypt*',
+      ],
+      principals: [new iam.ServicePrincipal('cloudwatch.amazonaws.com')],
+      resources: ['*'],
+    });
+
+    encryptionKey.addToResourcePolicy(myCustomPolicy);
+
     const monitoringTopic = new sns.Topic(this, 'MonitoringTopic', {
-      masterKey: new kms.Key(this, 'KMSKey', {
-        enableKeyRotation: true,
-        alias: `${props.applicationName}-${props.stageName}-Monitoring-key`,
-      }),
+      masterKey: encryptionKey,
     });
 
     monitoringTopic.grantPublish(new iam.AccountRootPrincipal);

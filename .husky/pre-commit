@@ -1,11 +1,10 @@
-#!/usr/bin/env sh
-# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved. SPDX-License-Identifier: MIT-0
-
-. "$(dirname -- "$0")/_/husky.sh"
-
 if [ -z $RUN_PRE_COMMIT_HOOKS ]; then exit 0; fi
+if [ -z $AWS_REGION ] || [ -z $ACCOUNT_RES ] || [ -z $RES_ACCOUNT_AWS_PROFILE ] || [ -z $CDK_QUALIFIER ] || [ -z $GIT_REPOSITORY ]; then 
+    echo "Run 'source export_vars.sh' to export the mandatory variables for building the project"
+    exit 1;
+fi
 
-./scripts/check-audit.sh
+./scripts/check-deps.sh
 ./scripts/build.sh
 ./scripts/test.sh
 ./scripts/cdk-synth.sh

@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Released]
 
+## [1.2.2] - 2024-05-16
+
+This is a bugfix release. Please check below the fixed items.
+
+### Added
+- Pre-commit hook verifies existence of mandatory environment variables
+### Changed
+- Updated CDK version to 2.140.0
+- Updated 3rd party NPM libraries version
+### Fixed
+- Docker builds to go through VPC Proxy properly when Proxy is bind behind the VPC (DPP Outbound Proxy)
+- Fixed IAM Resource Policy of the KMS Key used in the MonitoringStack which is used for publishing alerts to SNS
+- Fixed husky pre-commit hook to allow upgrade to its latest version 9.x.x
+
 ## [1.2.1] - 2024-03-06
 
 In this release we introduced the ability to customize and extend the list of available deployment stages. On top of the existing stages, you are allowed to define other stages differently from each other to support use cases where stages are not unified. We have also enabled AWS SSM ParameterStore to lookup for VPC ids stored there instead of passing them as plain text. Various bugfixes were also applied. **Please make sure to manually deploy the PipelineStack in your RES account as the CodeBuild Synth phase shell was changed from `sh` to `bash`, you can always refer to the instructions present in the README.md on how to run the ```cdk deploy``` command locally.**

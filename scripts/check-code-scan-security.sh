@@ -121,11 +121,11 @@ function shellcheck_scan() {
     # Execute shellcheck
     if [[ -z "$JUNIT_REPORT" ]]; then
         find $PROJECT_ROOT -type f \( -name '*.sh' -o -name '*.bash' -o -name '*.ksh' -o -name '*.bashrc' -o -name '*.bash_profile' -o -name '*.bash_login' -o -name '*.bash_logout' \) \
-        -not -path "*/node_modules/*" -not -path "*/cdk.out/*" \
+        -not -path "*/node_modules/*" -not -path "*/cdk.out/*" -not -path "*/.husky/_/*" \
         | xargs shellcheck -x --severity="$SHELLCHECK_SEVERITY"
     else
         if ! find $PROJECT_ROOT -type f \( -name '*.sh' -o -name '*.bash' -o -name '*.ksh' -o -name '*.bashrc' -o -name '*.bash_profile' -o -name '*.bash_login' -o -name '*.bash_logout' \) \
-        -not -path "*/node_modules/*" -not -path "*/cdk.out/*" \
+        -not -path "*/node_modules/*" -not -path "*/cdk.out/*" -not -path "*/.husky/_/*" \
         | xargs shellcheck -x --severity="$SHELLCHECK_SEVERITY" -f checkstyle > "${JUNIT_REPORT_FOLDER}/shellcheck-checkstyle-results.xml"; then
             CHECK_FAILED=1;
         fi
