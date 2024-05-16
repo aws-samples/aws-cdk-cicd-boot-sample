@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Released]
 
-## [1.2.2] - 2024-05-15
+## [1.2.2] - 2024-05-16
 
 This is a bugfix release. Please check below the fixed items.
 
