@@ -11,7 +11,6 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as pipelines from 'aws-cdk-lib/pipelines';
 import * as nag from 'cdk-nag';
 import { Construct } from 'constructs';
-import { CodeCommitRepositoryAspects } from './CodeCommitRepositoryAspects';
 import { ICodeCommitConfig } from '../../../../config/Types';
 import { CDKPipeline, IVpcProps } from '../../../cdk-pipeline/core/CDKPipeline';
 import { SSMParameterStack } from '../SSMParameterStack';
@@ -42,81 +41,72 @@ export class CodeCommitRepositoryConstruct extends Construct {
         type: 'CodeCommit',
       });
     }
-
-    // The Lambda Runtimes has been updated by the CodeCommitRepositoryAspects,
-    // with this method the false warnings have been suppressed
-    suppressDeprecationWarning(() => {
-      const approvalRuleTemplateName = new ApprovalRuleTemplate(this, 'ApprovalRuleTemplate', {
-        approvalRuleTemplateName: `${props.applicationName}-Require-1-Approver`,
-        template: {
-          approvers: {
-            numberOfApprovalsNeeded: 1,
-          },
+    const approvalRuleTemplateName = new ApprovalRuleTemplate(this, 'ApprovalRuleTemplate', {
+      approvalRuleTemplateName: `${props.applicationName}-Require-1-Approver`,
+      template: {
+        approvers: {
+          numberOfApprovalsNeeded: 1,
         },
-      }).approvalRuleTemplateName;
+      },
+    }).approvalRuleTemplateName;
 
-      new ApprovalRuleTemplateRepositoryAssociation(this, 'ApprovalRuleTemplateRepositoryAssociation', {
-        approvalRuleTemplateName,
-        repository,
-      });
+    new ApprovalRuleTemplateRepositoryAssociation(this, 'ApprovalRuleTemplateRepositoryAssociation', {
+      approvalRuleTemplateName,
+      repository,
+    });
 
-      const buildSpec = CDKPipeline.getPartialBuildSpec(props.vpcProps);
+    const buildSpec = CDKPipeline.getPartialBuildSpec(props.vpcProps);
 
-      codebuild.mergeBuildSpecs(buildSpec, codebuild.BuildSpec.fromObject({
-        phases: {
-          install: {
-            commands: [
-              `export CDK_QUALIFIER=${props.applicationQualifier}`,
-            ],
-          },
-          build: {
-            commands: CDKPipeline.pipelineCommands,
-          },
+    codebuild.mergeBuildSpecs(buildSpec, codebuild.BuildSpec.fromObject({
+      phases: {
+        install: {
+          commands: [
+            `export CDK_QUALIFIER=${props.applicationQualifier}`,
+          ],
         },
-      }));
+        build: {
+          commands: CDKPipeline.pipelineCommands,
+        },
+      },
+    }));
 
-      const pullRequestCheck = new PullRequestCheck(this, 'PullRequestCheck', {
-        repository,
-        buildSpec: codebuild.BuildSpec.fromObject(buildSpec),
-        vpc: props.vpcProps?.vpc,
-        privileged: props.codeBuildConfig.isPrivileged,
-        buildImage: props.codeBuildConfig.buildImage,
-      });
+    const pullRequestCheck = new PullRequestCheck(this, 'PullRequestCheck', {
+      repository,
+      buildSpec: codebuild.BuildSpec.fromObject(buildSpec),
+      vpc: props.vpcProps?.vpc,
+      privileged: props.codeBuildConfig.isPrivileged,
+      buildImage: props.codeBuildConfig.buildImage,
+    });
 
+    pullRequestCheck.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          'sts:AssumeRole',
+        ],
+        resources: [
+          'arn:aws:iam::*:role/cdk-*-lookup-role-*',
+        ],
+      }),
+    );
+
+    pullRequestCheck.addToRolePolicy(
+      SSMParameterStack.getGetParameterPolicyStatement(cdk.Stack.of(this).account, cdk.Stack.of(this).region, props.applicationQualifier ),
+    );
+
+    if (props.vpcProps?.proxy?.proxySecretArn) {
       pullRequestCheck.addToRolePolicy(
         new iam.PolicyStatement({
           effect: iam.Effect.ALLOW,
           actions: [
-            'sts:AssumeRole',
+            'secretsmanager:GetSecretValue',
           ],
           resources: [
-            'arn:aws:iam::*:role/cdk-*-lookup-role-*',
+            props.vpcProps.proxy.proxySecretArn,
           ],
         }),
       );
-
-      pullRequestCheck.addToRolePolicy(
-        SSMParameterStack.getGetParameterPolicyStatement(cdk.Stack.of(this).account, cdk.Stack.of(this).region, props.applicationQualifier ),
-      );
-
-      if (props.vpcProps?.proxy?.proxySecretArn) {
-        pullRequestCheck.addToRolePolicy(
-          new iam.PolicyStatement({
-            effect: iam.Effect.ALLOW,
-            actions: [
-              'secretsmanager:GetSecretValue',
-            ],
-            resources: [
-              props.vpcProps.proxy.proxySecretArn,
-            ],
-          }),
-        );
-      }
-    });
-
-    cdk.Aspects.of(cdk.Stack.of(this)).add(
-      new CodeCommitRepositoryAspects(),
-    );
+    };
 
     nag.NagSuppressions.addResourceSuppressions(
       this,
@@ -148,16 +138,6 @@ export class CodeCommitRepositoryConstruct extends Construct {
       ],
       true,
     );
-  }
-}
-function suppressDeprecationWarning(block: () => void) {
-  const originalJsiiSettings = process.env.JSII_DEPRECATED;
-
-  process.env.JSII_DEPRECATED = 'quiet';
-  try {
-    block();
-  } finally {
-    process.env.JSII_DEPRECATED = originalJsiiSettings;
   }
 }
 

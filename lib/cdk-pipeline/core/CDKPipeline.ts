@@ -117,7 +117,6 @@ export class CDKPipeline extends pipelines.CodePipeline {
         proxy: {
           noProxy,
           proxySecretArn,
-          proxyTestUrl,
         },
       } = vpcProps;
 

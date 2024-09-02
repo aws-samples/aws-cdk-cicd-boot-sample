@@ -468,8 +468,6 @@ For more information, see [SECURITY](SECURITY.md)
 
 ## Known Issues
 Check below the list of all the known issues for which we do not yet have a final fix and/or take longer than 1 release cycle to completely fix them:
-- **⚠ CodeCommitRepositoryConstruct: NODEJS_16_X support** If you are using AWS CodeCommit as repository type in your package.json (by setting "repositoryType": "CODECOMMIT") you need to know that we have overriden the Lambda runtime from NODEJS_14_X to NODEJS_16_X and also suppressed the false positive warnings for all the resources coming from the following construct: `CodeCommitRepositoryConstruct` in a separate construct: `CodeCommitRepositoryAspects` utilizing the [Aspects](https://docs.aws.amazon.com/cdk/v2/guide/aspects.html). The NODEJS_16_X runtime will be deprecated on Jun 12, 2024. This means that if you want to deploy new pipelines using CodeCommit the `CodeCommitRepositoryConstruct` will fail to deploy, the existing deployments won't be affected. Until we have a fix the only easy solution is the minimum version overriding from NODEJS_14_X to NODEJS_16_X (the overriding to NODEJS_18_X is not compatible to be done in this way, hence not done).
-
 
 ## Common Issues
 Check below the list of potential issues you might encounter due to misconfigurations of your local environment when developing on top of the CICD Boot:

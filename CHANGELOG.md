@@ -12,8 +12,10 @@ This is a bugfix release. Please check below the fixed items.
 
 ### Added
 ### Changed
+- Remove redundant aspect (not needed anymore as the @cloudcomponents packages now support NODEJS >= 16)
 - Updated CDK version to 2.155.0
 - Updated 3rd party NPM libraries version
+- Switched to Node 22.x
 ### Fixed
 - Licence Checker, pinned the version to previous working version (4.3.0)
 
