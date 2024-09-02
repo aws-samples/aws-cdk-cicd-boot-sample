@@ -11,7 +11,7 @@ import * as path from 'path';
 import { parse, stringify } from 'csv/sync';
 import * as glob from 'glob';
 
-const NPM_LICENSE_CHECKER_TOOL = 'license-checker-rseidelsohn';
+const NPM_LICENSE_CHECKER_TOOL = 'license-checker-rseidelsohn@4.3.0';
 const PYTHON_LICENSE_CHECKER_TOOL = 'pip-licenses';
 
 // 5 min timeout
