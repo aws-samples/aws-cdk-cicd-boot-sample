@@ -9,11 +9,11 @@
 "Apache-2.0","22"
 "BSD-2-Clause","9"
 "BSD-3-Clause","18"
-"BlueOak-1.0.0","2"
+"BlueOak-1.0.0","3"
 "CC-BY-4.0","1"
-"ISC","54"
+"ISC","55"
 "MIT*","2"
-"MIT","529"
+"MIT","544"
 "Python-2.0","1"
 #########################
 # Python module: src/lambda-layer/common/Pipfile

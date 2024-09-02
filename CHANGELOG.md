@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Released]
 
+## [1.2.3] - 2024-09-02
+
+This is a bugfix release. Please check below the fixed items.
+
+### Added
+### Changed
+- Updated CDK version to 2.155.0
+- Updated 3rd party NPM libraries version
+### Fixed
+- Licence Checker, pinned the version to previous working version (4.3.0)
+
 ## [1.2.2] - 2024-05-16
 
 This is a bugfix release. Please check below the fixed items.
